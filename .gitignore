@@ -10,3 +10,5 @@ Exposure_*/
 *.cr3
 *.dng
 *.DNG
+
+logs/

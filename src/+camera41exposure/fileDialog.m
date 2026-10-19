@@ -4,7 +4,9 @@ if ~isgraphics(parent)
  for k=1:nargout,if kind=="input",varargout{k}={};else,varargout{k}=0;end;end
  return
 end
-cleanup=onCleanup(@()camera41exposure.restoreFocus(parent));
+started=tic;camera41exposure.logEvent('dialog.enter',struct('Kind',kind,'Arguments',{varargin}));
+cleanup=onCleanup(@()restore());
+try
 switch kind
  case "open",[varargout{1:nargout}]=uigetfile(varargin{:});
  case "folder",[varargout{1:nargout}]=uigetdir(varargin{:});
@@ -12,8 +14,16 @@ switch kind
  case "input",[varargout{1:nargout}]=inputdlg(varargin{:});
  otherwise,error('Camera41:Pre:DialogKind','Unknown dialog kind.');
 end
+camera41exposure.logEvent('dialog.return',struct('Kind',kind,'Seconds',toc(started),'IncludesUserSelectionTime',true));
+catch err
+ camera41exposure.logEvent('dialog.error',struct('Kind',kind,'Seconds',toc(started),'Report',getReport(err,'extended','hyperlinks','off')));rethrow(err);
+end
 % A user may close the parent while a native chooser is open.
 if ~isgraphics(parent)
  for k=1:nargout,if kind=="input",varargout{k}={};else,varargout{k}=0;end;end
 end
+ function restore()
+  focusTimer=tic;camera41exposure.restoreFocus(parent);
+  camera41exposure.logEvent('dialog.focus_restored',struct('Kind',kind,'Seconds',toc(focusTimer)));
+ end
 end

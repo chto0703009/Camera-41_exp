@@ -26,11 +26,15 @@ out=options.OutputRoot;assert(~isfolder(out) && ~isfile(out),'Camera41:Exposure:
 n=numel(inputs);times=zeros(n,1);statuses=strings(n,1);headroom=zeros(n,4);signals=zeros(n,4);above=zeros(n,4);reports=cell(n,1);
 sources=struct('Path',{},'SHA256',{});
 for k=1:n
+ decodeTimer=tic;camera41exposure.logEvent('raw.decode.begin',struct('Index',k,'Count',n,'File',inputs(k)));
  decoded=camera41exposure.raw.decode(inputs(k),OutputRoot=fullfile(out,'decode'));
+ camera41exposure.logEvent('raw.decode.complete',struct('File',inputs(k),'Seconds',toc(decodeTimer)));
+ assessmentTimer=tic;
  if k==1,body=string(decoded.CameraIdentity.BodyIdentifierSHA256);iso=decoded.LibRaw.iso;aperture=decoded.LibRaw.aperture;dimensions=[decoded.LibRaw.visible_width decoded.LibRaw.visible_height];end
  assert(string(decoded.CameraIdentity.BodyIdentifierSHA256)==body && decoded.LibRaw.iso==iso && abs(decoded.LibRaw.aperture-aperture)<1e-12 && isequal([decoded.LibRaw.visible_width decoded.LibRaw.visible_height],dimensions), ...
  'Camera41:Exposure:CaptureMismatch','All samples must use the same camera, ISO, aperture and image dimensions.');
  r=camera41exposure.raw.assessValoiCapture(decoded,options.ROI,PassMarginEV=options.PassMarginEV,FailFraction=options.FailFraction);
+ camera41exposure.logEvent('raw.assessment.complete',struct('File',inputs(k),'Seconds',toc(assessmentTimer),'Status',r.Status,'Channels',r.Channels));
  reports{k}=r;times(k)=r.CameraSettings.ShutterSeconds;statuses(k)=string(r.Status);
  headroom(k,:)=[r.Channels.HeadroomEV];signals(k,:)=[r.Channels.MedianSignalCodes];above(k,:)=[r.ExposureAssessment.Channels.AboveLinearityFraction];
  sources(end+1)=struct('Path',inputs(k),'SHA256',string(decoded.Source.SHA256));

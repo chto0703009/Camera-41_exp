@@ -17,3 +17,7 @@ MATLAB och den medföljande LibRaw-proben krävs. Apple Silicon-proben är verif
 Vid FAIL visar rapporten vilka kanaler som överskrider gränsen, signal i koder, marginal i EV och andel pixlar vid/över gränsen. **Save report** sparar mätningar och förklaringar även utan en godkänd tid. En enda RAW kan bedömas, men flera exponeringstider behövs för jämförelse och proportionalitetskontroll. Standardområdet i övre vänstra hörnet ska ersättas med en representativ ren filmbasregion.
 
 RAW-filväljaren öppnas direkt i senast använda RAW-mapp. Mappen sparas i MATLAB-inställningarna och återanvänds även efter omstart av appen. Avbryt ändrar inte mappen. Första gången används hemmappen.
+
+## Logg
+
+Hela appens händelselogg finns i `logs/camera41_exposure.jsonl`. Menyn **Log → Open complete log** öppnar den i MATLAB. Varje rad har UTC-tidsstämpel, process-ID, händelse och detaljer. Start, mappkontroll, filval, filer, inställningar, förhandsvisning, mätområde, analys per RAW, resultat, sparande, fel med stack och stängning loggas. Varaktigheter anges i sekunder. Filväljarens tid omfattar både systemets väntetid och tiden användaren väljer filer; MATLAB ger ingen separat signal när den inbyggda filväljaren blivit synlig. Loggen är lokal och ignoreras av Git.
