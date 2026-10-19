@@ -1,0 +1,96 @@
+{
+  "language": "EN",
+  "title": "User handbook",
+  "subtitle": "Digital-camera exposure for film scanning",
+  "date": "19 October 2026",
+  "pages": [
+    {
+      "title": "Why use Exposure?",
+      "intro": "Camera-41 Exposure is a standalone tool for choosing the digital-camera shutter time when photographing negatives, at a fixed selected aperture.",
+      "sections": [
+        [
+          "Avoid clipping in the RAW capture",
+          "An empty frame containing film base plus fog (FB+F) normally transmits more light than denser image areas of a negative. It is therefore an important exposure reference. If the shutter time is too long, one colour channel may reach its limit. Measurable information is then lost; making the preview darker cannot restore it.\nExposure reads the original Bayer values and compares signal and headroom relative to LibRaw's linearity limit in R, G1, G2 and B. The aim is a strong usable signal with margin, not the brightest image on screen."
+        ],
+        [
+          "What the app does",
+          "It compares RAW files at different shutter times, normally chooses an area away from the edges and plots signal and clipping margin. It proposes the longest actually measured time that meets its criteria. A proposal may need further test captures."
+        ],
+        [
+          "What it does not do",
+          "Exposure does not measure dark noise or full S/N and does not create a production qualification. It does not control the camera. The exposure choice concerns the digital capture, not the original analog exposure when the film was photographed."
+        ],
+        [
+          "Quick start",
+          "1. Open start.m in MATLAB and press Run, or run startCamera41_exposure; from the app folder.\n2. Add RAW files of the same empty FB+F sample at different shutter times.\n3. Describe the light and sample; confirm that all files show the same sample.\n4. Press Analyse RAW images. Review the report and Exposure comparison.\n5. Select a measured passing time, set the camera yourself and confirm with a fresh capture."
+        ]
+      ]
+    },
+    {
+      "title": "Capture files and select an area",
+      "intro": "Use an empty film frame containing base plus fog from the film being scanned. A negative with a scene, text, perforations or a holder edge is not a suitable empty FB+F area.",
+      "sections": [
+        [
+          "Keep the setup fixed",
+          "Use the same camera, ISO, aperture, light mode and geometry throughout the bracket. Choose the aperture first and change only shutter time. Start a separate comparison if the light, film sample or setup changes. Light source / mode / setup and Physical film base + fog identification document what was measured."
+        ],
+        [
+          "Add and preview RAW files",
+          "Add FB+F RAW files accepts one or more files. Later selections are added to the list; the same path is not duplicated. The file chooser remembers the latest RAW folder across app restarts. Remove selected removes a row from the bracket, not the original file.\nSelect a row and press Preview selected RAW to inspect it. RAW preview is a display image with brightness adjustment; screen brightness does not determine whether the measurement passes."
+        ],
+        [
+          "Automatic area",
+          "Automatic area is enabled by default. The central 70 percent of visible width and height is used, leaving a 15 percent border on each side. The same area is measured throughout the bracket. The app does not hunt for a small favourable patch to make an excessive exposure pass.\nA per-Bayer-channel screen checks for substantial structure, large illumination differences or insufficient signal. This assists inspection but cannot reliably identify the physical contents of a film frame."
+        ],
+        [
+          "When a warning requires adjustment",
+          "If a substantial deviation is detected, the affected image is shown with the proposed area marked in yellow. Read the warning, then move or resize the rectangle onto clean empty film. Adjust marked area enables manual adjustment. X, Y, Width and Height refer to native visible sensor pixels. The rectangle is constrained to the image bounds.\nDo not exclude a genuinely clipped bright part of the FB+F sample merely to obtain PASS. If the correct empty sample cannot be identified, capture a new test frame."
+        ]
+      ]
+    },
+    {
+      "title": "Interpret the results",
+      "intro": "Successful RAW reading and a passing exposure are different outcomes. FAIL can be a valid measurement from a file that was read successfully.",
+      "sections": [
+        [
+          "PASS, REVIEW and FAIL",
+          "PASS: every channel retains at least 1/3 EV headroom at the 99.9th percentile, with too few values at/above the linearity limit to trigger FAIL.\nREVIEW: no channel triggers FAIL, but at least one retains less than 1/3 EV margin. Do not increase exposure; try a slightly shorter time.\nFAIL: at least one channel has 0.01 percent or more of its measured values at/above the limit. First check the sample and measurement area. If they are correct, try a shorter shutter time.\nThe reference is the RAW linearity limit after black subtraction, not a JPEG histogram. Loss of linearity can matter before hard sensor saturation."
+        ],
+        [
+          "Plots and table",
+          "Exposure comparison plots RAW signal codes and headroom in EV against shutter time, separately for R, G1, G2 and B. A single image gives only one point per channel; add other times for a comparison.\nThe table shows file, time, status, minimum headroom and the largest channel fraction at/above the limit. The text report provides per-channel measurements and explanations. Positive margin means headroom below the limit; negative margin means the percentile value exceeds it."
+        ],
+        [
+          "A candidate may need more evidence",
+          "No passing exposure: try shorter times if the correct FB+F area clips.\nLongest passing time without a higher non-passing capture: extend the bracket upward to bound the choice.\nToo wide a gap to the next higher non-passing time: test an intermediate time.\nThe internal proportionality check needs at least three distinct passing times spanning at least one stop (2× time). Less evidence means an insufficient check, not automatic proof of a faulty camera."
+        ],
+        [
+          "Choose a time with margin",
+          "The list at the bottom contains measured passing times. The app's candidate is preselected. Confirm the chosen time with a fresh FB+F capture before a longer scanning session. Do not lengthen exposure simply because the preview looks better. Revisit the test if camera settings, lighting or film base change."
+        ]
+      ]
+    },
+    {
+      "title": "After the test, logging and help",
+      "intro": "Exposure works independently. No JSON file is transferred from Exposure to PRE or NEG, and neither program needs to be open to use it.",
+      "sections": [
+        [
+          "Continue in PRE with current captures",
+          "Set the digital camera to the chosen time yourself. Capture the current film's empty FB+F frame and two separate dark RAWs with the same camera, ISO, shutter time and aperture. For the dark frames, block light from reaching the sensor and use relevant matching capture conditions.\nLoad those files directly in PRE tab 7. FB+F and the dark pair can be inspected with a common sensor area and used for noise and S/N measurement. PRE includes its measured result in the film characterisation delivered to NEG. Exposure does not export that measurement and need not be installed for PRE to work."
+        ],
+        [
+          "If something looks wrong",
+          "Nothing in RAW preview: select a file and press Preview selected RAW. Plots are in the other tab, Exposure comparison.\nNo selectable time: read the channel report. Every file may be REVIEW or FAIL. One failed capture cannot establish a useful time.\nRAW file missing: check that the file or external drive is still available.\nSlow chooser or an error: inspect the log. Preparation, dialog, file registration and analysis are recorded separately.\nAfter a code update: close the Exposure window and start the app again."
+        ],
+        [
+          "Log and retained information",
+          "Log > Open complete log opens logs/camera41_exposure.jsonl in the app folder. Each record contains UTC time, process ID, event and details. File selections, settings, measurements, durations and errors are logged. Native chooser duration includes the time you spend selecting files; it does not by itself identify when the dialog first became visible.\nThe latest RAW folder is stored in MATLAB preferences. The file list and other window settings are not restored after closing. Original RAWs remain unchanged. The log is local and excluded from Git."
+        ],
+        [
+          "Requirements, edition and licences",
+          "This handbook describes the app as of 19 October 2026. MATLAB and the supplied LibRaw reader are required; the Apple Silicon reader has been tested on the development computer. On another computer the reader may need rebuilding with LibRaw and pkg-config.\nThe project's own code and documentation use GPL-3.0-or-later. See LICENSE and LICENSE_NOTICE.md. Third-party notices for LibRaw, JPEG-turbo, libomp and Little CMS are in third_party/licenses. MATLAB requires its own licence. Author: Christer Törnkvist."
+        ]
+      ]
+    }
+  ]
+}

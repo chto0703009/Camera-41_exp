@@ -9,3 +9,10 @@ Exposure does not export a JSON handoff. At the chosen time, capture the current
 The last RAW folder is remembered. The local application log is `logs/camera41_exposure.jsonl`, available from **Log → Open complete log**. It includes timing, file choices, analyses and errors. Native dialog timing includes the user's file selection time. Logs are excluded from Git.
 
 MATLAB and the bundled LibRaw probe are required. Original RAWs are unchanged. Automatic uniformity screening is heuristic and does not establish physical film identity or production qualification. GPL-3.0-or-later; see LICENSE and third_party/licenses.
+
+## Handbooks / Handböcker
+
+- [Svensk handbok (PDF)](output/pdf/Camera41_Exposure_Handbook_SV.pdf)
+- [English handbook (PDF)](output/pdf/Camera41_Exposure_Handbook_EN.pdf)
+
+Editable sources are in `docs/handbook/handbook_sv.json` and `handbook_en.json`. Rebuild both PDFs with `python tools/build_handbooks.py` (requires reportlab). The handbooks describe why FB+F exposure is used to avoid clipping, capture setup, automatic/manual areas, results, standalone operation and logging.

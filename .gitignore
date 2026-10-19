@@ -12,3 +12,5 @@ Exposure_*/
 *.DNG
 
 logs/
+
+tmp/

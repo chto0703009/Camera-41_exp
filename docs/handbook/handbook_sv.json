@@ -1,0 +1,96 @@
+{
+  "language": "SV",
+  "title": "Handbok",
+  "subtitle": "Digitalkamerans exponering vid filminläsning",
+  "date": "19 oktober 2026",
+  "pages": [
+    {
+      "title": "Varför använda Exposure?",
+      "intro": "Camera-41 Exposure är ett fristående hjälpmedel för att välja digitalkamerans exponeringstid vid avfotografering av negativ, vid en fast vald bländare.",
+      "sections": [
+        [
+          "Undvik klippning i RAW-bilden",
+          "En tom ruta med filmbas + slöja (FB+F) släpper normalt igenom mer ljus än negativets tätare bildpartier. Den är därför en viktig referens för exponeringen. Om exponeringstiden blir för lång kan en färgkanal nå sin gräns. Då går mätbar information förlorad; en mörkare förhandsvisning kan inte återställa den.\nExposure läser de ursprungliga Bayer-värdena och jämför signal och marginal till LibRaws linjäritetsgräns i R, G1, G2 och B. Målet är en stark användbar signal med marginal, inte den ljusaste bilden på skärmen."
+        ],
+        [
+          "Vad appen gör",
+          "Den jämför RAW-bilder vid olika tider, väljer normalt ett område bortom kanterna och visar signal och klippningsmarginal i diagram. Den föreslår den längsta faktiskt uppmätta tiden som uppfyller villkoren. Ett förslag kan behöva kompletterande prov."
+        ],
+        [
+          "Vad appen inte gör",
+          "Exposure mäter inte mörkerbrus eller fullständigt S/N och skapar ingen produktionskvalificering. Den styr inte kameran. Exponeringsvalet gäller digitalkameran vid inläsningen, inte den analoga exponeringen när filmen togs."
+        ],
+        [
+          "Snabbstart",
+          "1. Öppna start.m i MATLAB och tryck Run, eller kör startCamera41_exposure; från appmappen.\n2. Läs in en RAW-serie av samma tomma FB+F-prov med olika exponeringstider.\n3. Beskriv ljus och prov; bekräfta att samma prov visas i alla bilder.\n4. Tryck Analyse RAW images. Granska resultat och Exposure comparison.\n5. Välj en godkänd tid, ställ in kameran och kontrollera med en ny bild."
+        ]
+      ]
+    },
+    {
+      "title": "Ta bilder och välj mätområde",
+      "intro": "Använd en tom filmruta med bas + slöja från den film som ska läsas in. Ett negativ med motiv, text, perforering eller hållarkant är ingen lämplig tom FB+F-yta.",
+      "sections": [
+        [
+          "Håll uppställningen fast",
+          "Använd samma kamera, ISO, bländare, ljusläge och geometri under hela serien. Välj bländare först och variera bara exponeringstiden. Om ljus, filmprov eller uppställning ändras ska du göra en separat jämförelse. Uppgifterna Light source / mode / setup och Physical film base + fog identification hjälper dig att hålla reda på vad som mättes."
+        ],
+        [
+          "Läs in och förhandsvisa",
+          "Add FB+F RAW files lägger till en eller flera filer. Ytterligare filval läggs till i listan; samma sökväg dubbleras inte. Filväljaren minns senaste RAW-mappen även efter omstart. Remove selected tar bort vald rad ur provserien, inte originalfilen.\nMarkera en rad och välj Preview selected RAW för att se bilden. RAW preview är en visningsbild med ljushetsanpassning; skärmens ljushet avgör inte om mätningen godkänns."
+        ],
+        [
+          "Automatiskt område",
+          "Automatic area är förvalt. Appen använder centrala 70 procent av bildens bredd och höjd, med 15 procents marginal på varje sida. Samma område används i serien. Den väljer inte en liten fläck för att göra en för hög exponering godkänd.\nEn kontroll per Bayer-kanal letar efter tydlig struktur, stor ljusskillnad eller för låg signal. Detta är en hjälp för granskning och kan inte säkert identifiera vad filmen föreställer."
+        ],
+        [
+          "När en varning kräver justering",
+          "Vid tydlig avvikelse visas den berörda bilden med ett gult föreslaget område. Läs varningen. Flytta eller ändra rutan till en ren tom yta; Adjust marked area används för manuell justering. Koordinaterna X, Y, Width och Height gäller originalbildens synliga sensorpixlar. Rutan begränsas till bildytan.\nVälj inte bort en ljust klippt del av en verklig FB+F-yta enbart för att få PASS. Om rätt tomma filmprov ändå inte kan identifieras behöver du ta om provbilden."
+        ]
+      ]
+    },
+    {
+      "title": "Förstå resultatet",
+      "intro": "En lyckad RAW-inläsning och en godkänd exponering är två olika saker. FAIL kan vara ett korrekt mätresultat från en fil som lästs in utan fel.",
+      "sections": [
+        [
+          "PASS, REVIEW och FAIL",
+          "PASS: alla fyra färgkanaler har minst 1/3 EV marginal vid 99,9-percentilen och för liten andel vid/över linjäritetsgränsen för FAIL.\nREVIEW: ingen kanal utlöser FAIL, men minst en har mindre än 1/3 EV marginal. Öka inte exponeringen; prova en något kortare tid.\nFAIL: minst en kanal har 0,01 procent eller mer av mätvärdena vid/över gränsen. Kontrollera först rätt filmprov och område. Om området är korrekt: prova kortare exponeringstid.\nGränsen är en RAW-linjäritetsgräns efter svartnivåsubtraktion, inte ett JPEG-histogram. Förlust av linearitet kan vara relevant redan innan hård sensormättnad."
+        ],
+        [
+          "Diagram och tabell",
+          "Exposure comparison visar signal i RAW-koder och marginal i EV mot exponeringstiden, separat för R, G1, G2 och B. Med en enda bild visas bara en punkt per kanal. Lägg till flera tider för en jämförelse.\nTabellen visar fil, tid, status, minsta marginal och största kanalandel vid/över gränsen. Textfältet redovisar mätvärden och orsak per kanal. Positiv marginal betyder utrymme under gränsen; negativ marginal betyder att percentilvärdet ligger över den."
+        ],
+        [
+          "Förslag är inte alltid ett färdigt val",
+          "Ingen godkänd exponering: ta kortare tider om rätt FB+F-yta klipper.\nLängsta godkända tid utan högre underkänd bild: komplettera serien med en högre tid för att avgränsa valet.\nFör glest intervall till nästa högre icke godkända tid: prova mellanliggande tid.\nDen interna proportionalitetskontrollen kräver minst tre olika godkända tider över minst ett steg (2× tid). Mindre underlag betyder otillräcklig kontroll, inte automatiskt att kameran är felaktig."
+        ],
+        [
+          "Välj tid med marginal",
+          "Listan längst ned innehåller uppmätta godkända tider. Appens kandidat är förvald. Bekräfta ditt val med en ny FB+F-bild innan en längre inläsning. Använd inte längre tid bara för att förhandsvisningen ser bättre ut. Återkom till provet om kamerainställningar, ljus eller filmens bas ändras."
+        ]
+      ]
+    },
+    {
+      "title": "Efter provet, logg och hjälp",
+      "intro": "Exposure fungerar självständigt. Du överför ingen JSON-fil från Exposure till PRE eller NEG, och de behöver inte vara öppna för att använda appen.",
+      "sections": [
+        [
+          "Fortsätt i PRE med aktuella bilder",
+          "Ställ själv in digitalkameran på vald tid. Ta den aktuella filmens tomma FB+F-ruta samt två separata mörker-RAW med samma kamera, ISO, exponeringstid och bländare. Mörkerbilderna tas med ljuset till sensorn blockerat och under relevanta matchande förhållanden.\nLäs dessa bilder direkt i PRE:s flik 7. Där kan FB+F och mörkerparet förhandsvisas med gemensamt sensorområde och användas för brus- och S/N-mätning. PRE:s mätresultat följer filmkarakteriseringen till NEG. Exposure exporterar inte detta underlag och behöver inte vara installerat för att PRE ska användas."
+        ],
+        [
+          "När något verkar fel",
+          "Inget syns i RAW preview: markera en fil och tryck Preview selected RAW. Diagrammet finns i den andra fliken, Exposure comparison.\nIngen tid kan väljas: läs kanalrapporten. Alla bilder kan vara REVIEW eller FAIL. En enda underkänd bild räcker inte för att hitta en bra tid.\nRAW file missing: kontrollera att filen eller dess externa disk fortfarande finns tillgänglig.\nSeg filväljare eller felmeddelande: använd loggen. Den skiljer förberedelse, dialog, filregistrering och analys åt.\nEfter uppdaterad programkod: stäng Exposure-fönstret och starta appen igen."
+        ],
+        [
+          "Logg och sparade uppgifter",
+          "Log > Open complete log öppnar logs/camera41_exposure.jsonl i appmappen. Varje post har UTC-tid, process-ID, händelse och detaljer. Filval, inställningar, mätningar, varaktigheter och fel loggas. Filväljarens tid inkluderar även tiden du själv väljer filer; den säger inte ensam när dialogen först blev synlig.\nSenaste RAW-mapp sparas i MATLAB-inställningarna. Vald bildlista och övriga fönsterinställningar återställs inte efter stängning. Original-RAW ändras inte. Loggen är lokal och ingår inte i Git."
+        ],
+        [
+          "Krav, version och licenser",
+          "Denna handbok beskriver appens funktioner den 19 oktober 2026. MATLAB och medföljande LibRaw-läsare krävs; Apple Silicon-versionen är provad på utvecklingsdatorn. Vid flytt till annan dator kan läsaren behöva byggas om med LibRaw och pkg-config.\nProgrammets egen kod och dokumentation: GPL-3.0-or-later. Full licens finns i LICENSE och information i LICENSE_NOTICE.md. Tredjepartslicenser för LibRaw, JPEG-turbo, libomp och Little CMS finns i third_party/licenses. MATLAB har egen licens. Upphovsperson: Christer Törnkvist."
+        ]
+      ]
+    }
+  ]
+}

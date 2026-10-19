@@ -17,4 +17,4 @@ roll data do not acquire a new licence merely by being processed by the app.
 Repository access and licensing are separate: the repository is currently private.
 
 Christer Törnkvist - christer@borgasundsfotografiska.se
-https://github.com/chto0703009/camera-41_neg
+https://github.com/chto0703009/camera-41_exposure
