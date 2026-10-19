@@ -5,7 +5,7 @@ if ~isgraphics(parent)
  return
 end
 started=tic;camera41exposure.logEvent('dialog.enter',struct('Kind',kind,'Arguments',{varargin}));
-cleanup=onCleanup(@()restore());
+cleanup=onCleanup(@()restoreDialogFocus(parent,kind));
 try
 switch kind
  case "open",[varargout{1:nargout}]=uigetfile(varargin{:});
@@ -22,8 +22,9 @@ end
 if ~isgraphics(parent)
  for k=1:nargout,if kind=="input",varargout{k}={};else,varargout{k}=0;end;end
 end
- function restore()
-  focusTimer=tic;camera41exposure.restoreFocus(parent);
-  camera41exposure.logEvent('dialog.focus_restored',struct('Kind',kind,'Seconds',toc(focusTimer)));
- end
+end
+function restoreDialogFocus(parent,kind)
+% Values are captured by onCleanup; no nested exiting workspace is accessed.
+focusTimer=tic;camera41exposure.restoreFocus(parent);
+camera41exposure.logEvent('dialog.focus_restored',struct('Kind',kind,'Seconds',toc(focusTimer)));
 end
