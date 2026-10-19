@@ -21,3 +21,9 @@ RAW-filväljaren öppnas direkt i senast använda RAW-mapp. Mappen sparas i MATL
 ## Logg
 
 Hela appens händelselogg finns i `logs/camera41_exposure.jsonl`. Menyn **Log → Open complete log** öppnar den i MATLAB. Varje rad har UTC-tidsstämpel, process-ID, händelse och detaljer. Start, mappkontroll, filval, filer, inställningar, förhandsvisning, mätområde, analys per RAW, resultat, sparande, fel med stack och stängning loggas. Varaktigheter anges i sekunder. Filväljarens tid omfattar både systemets väntetid och tiden användaren väljer filer; MATLAB ger ingen separat signal när den inbyggda filväljaren blivit synlig. Loggen är lokal och ignoreras av Git.
+
+## Automatiskt mätområde
+
+**Automatic area** är förvalt. Analysen använder centrala 70 % av den synliga RAW-bredden och höjden (15 % marginal på varje sida), med samma område i hela exponeringsserien. Appen söker inte efter den mest gynnsamma lilla fläcken. En rutnätskontroll för varje CFA-kanal skiljer jämn ljusvariation från tydlig struktur. Signifikanta avvikelser (95:e percentilen av residualen över 0,18 EV efter en jämn andragradsyta, eller mer än 1 EV spridning över rutmedianerna) eller för låg signal begär manuell granskning. Detta är en heuristisk kontroll av jämnhet, ingen säker identifiering av filminnehåll. Klippning bedöms separat även om bilden är jämn.
+
+Vid varning öppnas den berörda RAW-bilden automatiskt med det föreslagna området markerat i gult. Förklaringen visas och användaren justerar den befintliga rutan innan analysen fortsätter. Området begränsas till sensorns synliga pixlar. Förhandsvisning visar också den automatiska rutan vid normala bilder. En manuellt vald region är ett uttryckligt användarval och redovisas som manuellt i JSON-resultatet.

@@ -25,5 +25,5 @@ view=table(names,t.ShutterSeconds,string(t.Status),t.MinimumHeadroomEV,clipped,r
 if n==1,lines=[lines;"";"En bild bedömer bara den valda tiden. Lägg till bilder med andra tider för jämförelse och linjäritetskontroll."];end
 if all(string(t.Status)~="PASS"),lines=[lines;"Ingen godkänd tid kan väljas. Kontrollera först att mätområdet ligger på ren filmbas + slöja, och prova kortare tider."];
 else,lines=[lines;"Välj en godkänd uppmätt tid och spara resultatet till PRE."];end
-lines=[lines;"Standardområdet [1 1 100 100] är bildens övre vänstra hörn. Förhandsvisa RAW och rita ett representativt mätområde.";"Jämförelsekurvorna visas i fliken Exposure comparison. Spara rapport fungerar även vid FAIL."];
+lines=[lines;"Mätområdet undviker bildkanterna i automatiskt läge. Gul ruta visas i RAW preview; tydliga avvikelser kräver manuell justering.";"Jämförelsekurvorna visas i fliken Exposure comparison. Spara rapport fungerar även vid FAIL."];
 end
