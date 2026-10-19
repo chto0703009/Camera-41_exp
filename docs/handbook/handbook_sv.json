@@ -88,10 +88,13 @@
         ],
         [
           "Krav, version och licenser",
-          "Denna handbok avser Camera-41 Exposure v0.1.0, 19 oktober 2026. MATLAB och medföljande LibRaw-läsare krävs; Apple Silicon-versionen är provad på utvecklingsdatorn. Vid flytt till annan dator kan läsaren behöva byggas om med LibRaw och pkg-config.\nProgrammets egen kod och dokumentation: GPL-3.0-or-later. Full licens finns i LICENSE och information i LICENSE_NOTICE.md. Tredjepartslicenser för LibRaw, JPEG-turbo, libomp och Little CMS finns i third_party/licenses. MATLAB har egen licens. Upphovsperson: Christer Törnkvist.\nKontakt: christer@borgasundsfotografiska.se\nGitHub: https://github.com/chto0703009/camera-41_exposure"
+          "Denna handbok avser Camera-41 Exposure v0.1.0, 19 oktober 2026. MATLAB och medföljande LibRaw-läsare krävs; Apple Silicon-versionen är provad på utvecklingsdatorn. Vid flytt till annan dator kan läsaren behöva byggas om med LibRaw och pkg-config.\nProgrammets egen kod och dokumentation: GPL-3.0-or-later. Full licens finns i LICENSE och information i LICENSE_NOTICE.md. Tredjepartslicenser för LibRaw, JPEG-turbo, libomp och Little CMS finns i third_party/licenses. MATLAB har egen licens."
         ]
       ]
     }
   ],
-  "version": "0.1.0"
+  "version": "0.1.0",
+  "author": "Christer Törnkvist",
+  "email": "christer@borgasundsfotografiska.se",
+  "github": "https://github.com/chto0703009/camera-41_exposure"
 }

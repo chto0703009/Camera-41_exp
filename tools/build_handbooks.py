@@ -28,15 +28,21 @@ def build(data):
   w,h=A4;c.setStrokeColor(colors.HexColor('#d6e1e5'));c.setLineWidth(.7);c.line(54,h-47,w-54,h-47)
   c.setFont('Helvetica-Bold',9);c.setFillColor(INK);c.drawString(54,h-33,'CAMERA-41 EXPOSURE')
   c.setFont('Helvetica',8);c.setFillColor(GRAY);c.drawRightString(w-54,h-33,f'{data["title"]} | v{data["version"]} | {data["language"]}')
-  c.line(54,42,w-54,42);c.setFont('Helvetica',8);c.drawString(54,28,'v'+data['version']+' | '+data['date']+' | GPL-3.0-or-later')
-  c.drawRightString(w-54,28,f'{doc.page} / {len(data["pages"])}')
+  c.line(54,66,w-54,66)
+  c.setFont('Helvetica',9);c.setFillColor(BLUE)
+  c.drawString(54,51,data['email']);c.linkURL('mailto:'+data['email'],(54,49,54+c.stringWidth(data['email'],'Helvetica',9),61),relative=0)
+  c.drawString(54,37,data['github']);c.linkURL(data['github'],(54,35,54+c.stringWidth(data['github'],'Helvetica',9),47),relative=0)
+  c.setFont('Helvetica',8);c.setFillColor(GRAY);c.drawString(54,22,'v'+data['version']+' | '+data['date']+' | GPL-3.0-or-later')
+  c.drawRightString(w-54,22,f'{doc.page} / {len(data["pages"])}')
  story=[]
  for i,page in enumerate(data['pages']):
-  items=[p(data['subtitle'],'kicker'),p(page['title'],'title'),p(page['intro'],'intro')]
+  items=[p(data['subtitle'],'kicker'),p(page['title'],'title')]
+  if i==0:items.append(p(data['author'],'h'))
+  items.append(p(page['intro'],'intro'))
   for heading,body in page['sections']:items += [p(heading,'h'),p(body,'body')]
-  story.append(KeepInFrame(A4[0]-108,A4[1]-130,items,mode='shrink',hAlign='LEFT',vAlign='TOP'))
+  story.append(KeepInFrame(A4[0]-108,A4[1]-155,items,mode='shrink',hAlign='LEFT',vAlign='TOP'))
   if i<len(data['pages'])-1:story.append(PageBreak())
- doc=SimpleDocTemplate(str(path),pagesize=A4,rightMargin=54,leftMargin=54,topMargin=68,bottomMargin=54,
+ doc=SimpleDocTemplate(str(path),pagesize=A4,rightMargin=54,leftMargin=54,topMargin=68,bottomMargin=80,
   title='Camera-41 Exposure - '+data['title'],author='Christer Törnkvist',subject=data['subtitle'])
  doc.build(story,onFirstPage=chrome,onLaterPages=chrome)
  print(path)
