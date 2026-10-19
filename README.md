@@ -18,3 +18,5 @@ MATLAB and the bundled LibRaw probe are required. Original RAWs are unchanged. A
 - [English handbook (PDF)](output/pdf/Camera41_Exposure_Handbook_EN.pdf)
 
 Editable sources are in `docs/handbook/handbook_sv.json` and `handbook_en.json`. Rebuild both PDFs with `python tools/build_handbooks.py` (requires reportlab). The handbooks describe why FB+F exposure is used to avoid clipping, capture setup, automatic/manual areas, results, standalone operation and logging.
+
+[Sammanfattning på svenska (PDF)](output/pdf/Camera41_Exposure_Sammanfattning_SV.pdf) - fristående ensidesguide för v0.1.0.
