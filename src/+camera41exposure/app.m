@@ -14,7 +14,7 @@ logPath=camera41exposure.logEvent('window.created',struct());
 menu=uimenu(f,'Text','Log');uimenu(menu,'Text','Open complete log','MenuSelectedFcn',@(~,~)edit(logPath));
 g=uigridlayout(f,[8 1]);g.RowHeight={42,38,60,40,34,'1x',150,36};
 uilabel(g,'Text',{'Choose the digital-camera shutter time at a fixed, selected aperture using blank film base + fog RAWs.', ...
- 'Compare signal and clipping margin, then save JSON for PRE. PRE includes it in the film characterisation exported to NEG.'}, ...
+ 'Compare signal and clipping margin. Use the chosen time to capture current-film FB+F and a matched dark pair for measurement in PRE.'}, ...
  'WordWrap','on','Tag','Camera41ExposurePurpose');
 bar=uigridlayout(g,[1 4]);bar.Padding=[0 0 0 0];
 add=uibutton(bar,'Text','Add FB+F RAW files …','ButtonPushedFcn',@addFiles);
@@ -40,14 +40,11 @@ pg=uigridlayout(previewTab,[1 1]);ax=uiaxes(pg);axis(ax,'off');title(ax,'Click P
 cg=uigridlayout(comparisonTab,[2 1]);signalAxes=uiaxes(cg);marginAxes=uiaxes(cg);
 
 status=uitextarea(g,'Editable','off','Value',{'Add an exposure bracket, preview a RAW and draw the measurement area.','Analysis uses unchanged RAW sensor measurements. No PRE project is opened.','The proposed time must be verified with a new capture. Temporal noise is not measured by this test.'});
-foot=uigridlayout(g,[1 5]);foot.ColumnWidth={170,'1x',190,150,80};foot.Padding=[0 0 0 0];
+foot=uigridlayout(g,[1 3]);foot.ColumnWidth={190,'1x',100};foot.Padding=[0 0 0 0];
 run=uibutton(foot,'Text','Analyse RAW images','ButtonPushedFcn',@(~,~) analyse());
-chosen=uidropdown(foot,'Items',{'Analyse first'},'ItemsData',{''},'Enable','off');
-saveButton=uibutton(foot,'Text','Save selected time as JSON …','Enable','off','ButtonPushedFcn',@saveResult);
-reportButton=uibutton(foot,'Text','Save report …','Enable','off','ButtonPushedFcn',@saveReport);
-
+chosen=uidropdown(foot,'Items',{'Analyse first'},'ItemsData',{''},'Enable','off','ValueChangedFcn',@timeChosen);
 uibutton(foot,'Text','Close','ButtonPushedFcn',@closeApp);
-app=struct('Figure',f,'Controls',struct('Add',add,'Remove',remove,'Preview',preview,'DrawROI',draw,'Analyse',run,'Light',light,'Note',note,'Confirmed',confirm,'ROI',{coords},'AutomaticArea',automatic,'Files',list,'Summary',summary,'Status',status,'LogPath',logPath,'ExposureTime',chosen,'Save',saveButton,'SaveReport',reportButton,'SignalAxes',signalAxes,'MarginAxes',marginAxes),'SetFiles',@setFiles,'AnalyseTo',@analyse,'SaveTo',@saveTo,'GetLastRAWFolder',@() lastRAWFolder);
+app=struct('Figure',f,'Controls',struct('Add',add,'Remove',remove,'Preview',preview,'DrawROI',draw,'Analyse',run,'Light',light,'Note',note,'Confirmed',confirm,'ROI',{coords},'AutomaticArea',automatic,'Files',list,'Summary',summary,'Status',status,'LogPath',logPath,'ExposureTime',chosen,'SignalAxes',signalAxes,'MarginAxes',marginAxes),'SetFiles',@setFiles,'AnalyseTo',@analyse,'GetLastRAWFolder',@() lastRAWFolder);
 setappdata(f,'App',app);areaMode();
  function areaModeChanged(~,~),areaMode();changed();end
  function roiEdited(~,~)
@@ -56,9 +53,14 @@ setappdata(f,'App',app);areaMode();
  function areaMode(~,~)
   for j=1:4,coords{j}.Editable=~automatic.Value;end
  end
+ function timeChosen(~,~)
+  if isempty(result)||string(chosen.Value)=="",return;end
+  index=str2double(chosen.Value);status.Value=cellstr(["Chosen shutter time: "+analysisTable.ShutterSeconds(index)+" s";"Capture the current film's FB+F and two matched dark RAWs at this time, fixed ISO and aperture.";"Load those RAWs in PRE tab 7 to measure noise and S/N. No export from this app is required."]);
+  camera41exposure.logEvent('time.chosen',struct('Seconds',analysisTable.ShutterSeconds(index)));
+ end
  function changed(~,~)
   camera41exposure.logEvent('settings.changed',struct('Light',light.Value,'Sample',note.Value,'ROI',cellfun(@(c)c.Value,coords),'Confirmed',confirm.Value));
-  result=[];analysisTable=[];chosen.Enable='off';saveButton.Enable='off';reportButton.Enable='off';cla(signalAxes);cla(marginAxes);summary.Data={};status.Value={'Settings changed. Analyse again to obtain a result for these settings.'};
+  result=[];analysisTable=[];chosen.Enable='off';cla(signalAxes);cla(marginAxes);summary.Data={};status.Value={'Settings changed. Analyse again to obtain a result for these settings.'};
  end
  function setFiles(paths)
   updateTimer=tic;camera41exposure.logEvent('files.update.begin',struct('Count',numel(string(paths))));
@@ -81,7 +83,7 @@ setappdata(f,'App',app);areaMode();
  function begin()
   camera41exposure.logEvent('operation.busy',struct());
   assert(~running,'An operation is running.');running=true;
-  for c=[add remove preview draw run chosen saveButton reportButton],c.Enable='off';end
+  for c=[add remove preview draw run chosen],c.Enable='off';end
   light.Enable='off';note.Enable='off';confirm.Enable='off';automatic.Enable='off';for j=1:4,coords{j}.Enable='off';end;drawnow;
  end
  function finish()
@@ -89,8 +91,7 @@ setappdata(f,'App',app);areaMode();
   running=false;if ~isvalid(f),return;end
   for c=[add remove preview draw run],c.Enable='on';end
   light.Enable='on';note.Enable='on';confirm.Enable='on';automatic.Enable='on';areaMode();for j=1:4,coords{j}.Enable='on';end
-  if ~isempty(result),reportButton.Enable='on';end
-  if ~isempty(result) && any(string(analysisTable.Status)=="PASS"),chosen.Enable='on';saveButton.Enable='on';end
+  if ~isempty(result) && any(string(analysisTable.Status)=="PASS"),chosen.Enable='on';end
  end
  function showPreview(~,~)
   previewTimer=tic;camera41exposure.logEvent('preview.begin',struct('SelectedRow',selected));
@@ -162,32 +163,6 @@ setappdata(f,'App',app);areaMode();
     clear done;clear cleanup;showPreview();
    else,report(err);end
   end
- end
- function saveReport(~,~)
-  camera41exposure.logEvent('report.save.request',struct());
-  [name,folder]=camera41exposure.fileDialog("save",f,'*.json','Save full exposure report, including FAIL results','exposure_report.json');if isequal(name,0),return;end
-  try
-   saved=result;saved.Measurements=table2struct(analysisTable);[~,lines]=camera41exposure.explainResults(analysisTable,result);saved.Report=cellstr(lines);
-   saved.OutputFiles=struct('Scope','Self-contained measurement report; no exposure selected.');
-   fid=fopen(fullfile(string(folder),string(name)),'w','n','UTF-8');assert(fid>=0);cleanup=onCleanup(@() fclose(fid));fprintf(fid,'%s\n',jsonencode(saved));camera41exposure.logEvent('report.saved',struct('Selection',saved.Selection));
-  catch err,report(err);end
- end
- function saveResult(~,~)
-  [name,folder]=camera41exposure.fileDialog("save",f,'*.json','Save digitising-camera exposure result','exposure_preparation.json');if isequal(name,0),return;end
-  try,saveTo(fullfile(string(folder),string(name)));catch err,report(err);end
- end
- function saveTo(file)
-  camera41exposure.logEvent('selection.save.begin',struct('File',string(file)));
-  assert(~isempty(result) && chosen.Enable=="on",'Analyse and select a passing exposure first.');
-  index=str2double(chosen.Value);assert(string(analysisTable.Status(index))=="PASS",'Select a measured passing time.');
-  saved=result;saved.OperatorSelection=struct('ShutterSeconds',analysisTable.ShutterSeconds(index), ...
-   'RAWFile',char(string(analysisTable.RAWFile(index))),'Status','OPERATOR_SELECTED_MEASURED_PASS', ...
-   'QualificationCreated',false);
-  saved.Measurements=table2struct(analysisTable);
-  saved.OutputFiles=struct('Scope','Measurements embedded in this JSON; no external analysis folder required.');
-  fid=fopen(file,'w','n','UTF-8');assert(fid>=0,'Could not save JSON.');cleanup=onCleanup(@() fclose(fid));fprintf(fid,'%s\n',jsonencode(saved));
-  camera41exposure.logEvent('selection.saved',struct('File',string(file),'Selection',saved.OperatorSelection));
-  status.Value=cellstr(["Selected digitising-camera time: "+saved.OperatorSelection.ShutterSeconds+" s";"Saved: "+string(file);"Import this JSON in PRE tab 7. PRE embeds it in the film characterisation; no separate JSON import in NEG is needed."]);
  end
  function report(err)
   camera41exposure.logEvent('error',struct('Identifier',err.identifier,'Message',err.message,'Report',getReport(err,'extended','hyperlinks','off')));
