@@ -27,8 +27,8 @@ def build(data):
  def chrome(c,doc):
   w,h=A4;c.setStrokeColor(colors.HexColor('#d6e1e5'));c.setLineWidth(.7);c.line(54,h-47,w-54,h-47)
   c.setFont('Helvetica-Bold',9);c.setFillColor(INK);c.drawString(54,h-33,'CAMERA-41 EXPOSURE')
-  c.setFont('Helvetica',8);c.setFillColor(GRAY);c.drawRightString(w-54,h-33,f'{data["title"]} | {data["language"]}')
-  c.line(54,42,w-54,42);c.setFont('Helvetica',8);c.drawString(54,28,data['date']+' | GPL-3.0-or-later')
+  c.setFont('Helvetica',8);c.setFillColor(GRAY);c.drawRightString(w-54,h-33,f'{data["title"]} | v{data["version"]} | {data["language"]}')
+  c.line(54,42,w-54,42);c.setFont('Helvetica',8);c.drawString(54,28,'v'+data['version']+' | '+data['date']+' | GPL-3.0-or-later')
   c.drawRightString(w-54,28,f'{doc.page} / {len(data["pages"])}')
  story=[]
  for i,page in enumerate(data['pages']):

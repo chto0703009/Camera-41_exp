@@ -88,9 +88,10 @@
         ],
         [
           "Requirements, edition and licences",
-          "This handbook describes the app as of 19 October 2026. MATLAB and the supplied LibRaw reader are required; the Apple Silicon reader has been tested on the development computer. On another computer the reader may need rebuilding with LibRaw and pkg-config.\nThe project's own code and documentation use GPL-3.0-or-later. See LICENSE and LICENSE_NOTICE.md. Third-party notices for LibRaw, JPEG-turbo, libomp and Little CMS are in third_party/licenses. MATLAB requires its own licence. Author: Christer Törnkvist."
+          "This handbook covers Camera-41 Exposure v0.1.0, 19 October 2026. MATLAB and the supplied LibRaw reader are required; the Apple Silicon reader has been tested on the development computer. On another computer the reader may need rebuilding with LibRaw and pkg-config.\nThe project's own code and documentation use GPL-3.0-or-later. See LICENSE and LICENSE_NOTICE.md. Third-party notices for LibRaw, JPEG-turbo, libomp and Little CMS are in third_party/licenses. MATLAB requires its own licence. Author: Christer Törnkvist.\nContact: christer@borgasundsfotografiska.se\nGitHub: https://github.com/chto0703009/camera-41_exposure"
         ]
       ]
     }
-  ]
+  ],
+  "version": "0.1.0"
 }
