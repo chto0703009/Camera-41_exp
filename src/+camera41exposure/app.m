@@ -26,20 +26,21 @@ left=uigridlayout(body,[2 1]);left.RowHeight={'1x','1x'};
 list=uitable(left,'ColumnName',{'FB+F RAW file'},'ColumnWidth',{'auto'},'CellSelectionCallback',@select);
 summary=uitable(left);
 views=uitabgroup(body);previewTab=uitab(views,'Title','RAW preview');comparisonTab=uitab(views,'Title','Exposure comparison');
-pg=uigridlayout(previewTab,[1 1]);ax=uiaxes(pg);axis(ax,'off');
+pg=uigridlayout(previewTab,[1 1]);ax=uiaxes(pg);axis(ax,'off');title(ax,'Click Preview selected RAW to view the image and choose a clean film-base area');
 cg=uigridlayout(comparisonTab,[2 1]);signalAxes=uiaxes(cg);marginAxes=uiaxes(cg);
 
 status=uitextarea(g,'Editable','off','Value',{'Add an exposure bracket, preview a RAW and draw the measurement area.','Analysis uses unchanged RAW sensor measurements. No PRE project is opened.','The proposed time must be verified with a new capture. Temporal noise is not measured by this test.'});
-foot=uigridlayout(g,[1 4]);foot.ColumnWidth={180,'1x',230,100};foot.Padding=[0 0 0 0];
+foot=uigridlayout(g,[1 5]);foot.ColumnWidth={170,'1x',190,150,80};foot.Padding=[0 0 0 0];
 run=uibutton(foot,'Text','Analyse RAW images','ButtonPushedFcn',@(~,~) analyse());
 chosen=uidropdown(foot,'Items',{'Analyse first'},'ItemsData',{''},'Enable','off');
 saveButton=uibutton(foot,'Text','Save selected time as JSON …','Enable','off','ButtonPushedFcn',@saveResult);
+reportButton=uibutton(foot,'Text','Save report …','Enable','off','ButtonPushedFcn',@saveReport);
 
 uibutton(foot,'Text','Close','ButtonPushedFcn',@closeApp);
-app=struct('Figure',f,'Controls',struct('Add',add,'Remove',remove,'Preview',preview,'DrawROI',draw,'Analyse',run,'Light',light,'Note',note,'Confirmed',confirm,'ROI',{coords},'Files',list,'Summary',summary,'Status',status,'ExposureTime',chosen,'Save',saveButton,'SignalAxes',signalAxes,'MarginAxes',marginAxes),'SetFiles',@setFiles,'AnalyseTo',@analyse,'SaveTo',@saveTo);
+app=struct('Figure',f,'Controls',struct('Add',add,'Remove',remove,'Preview',preview,'DrawROI',draw,'Analyse',run,'Light',light,'Note',note,'Confirmed',confirm,'ROI',{coords},'Files',list,'Summary',summary,'Status',status,'ExposureTime',chosen,'Save',saveButton,'SaveReport',reportButton,'SignalAxes',signalAxes,'MarginAxes',marginAxes),'SetFiles',@setFiles,'AnalyseTo',@analyse,'SaveTo',@saveTo);
 setappdata(f,'App',app);
  function changed(~,~)
-  result=[];analysisTable=[];chosen.Enable='off';saveButton.Enable='off';cla(signalAxes);cla(marginAxes);summary.Data={};status.Value={'Settings changed. Analyse again to obtain a result for these settings.'};
+  result=[];analysisTable=[];chosen.Enable='off';saveButton.Enable='off';reportButton.Enable='off';cla(signalAxes);cla(marginAxes);summary.Data={};status.Value={'Settings changed. Analyse again to obtain a result for these settings.'};
  end
  function setFiles(paths)
   assert(~running,'An operation is running.');paths=string(paths);paths=paths(:);missing=paths(~isfile(paths));assert(isempty(missing),'RAW file missing: %s',join(missing,newline));
@@ -56,13 +57,14 @@ setappdata(f,'App',app);
  end
  function begin()
   assert(~running,'An operation is running.');running=true;
-  for c=[add remove preview draw run chosen saveButton],c.Enable='off';end
+  for c=[add remove preview draw run chosen saveButton reportButton],c.Enable='off';end
   light.Enable='off';note.Enable='off';confirm.Enable='off';for j=1:4,coords{j}.Enable='off';end;drawnow;
  end
  function finish()
   running=false;if ~isvalid(f),return;end
   for c=[add remove preview draw run],c.Enable='on';end
   light.Enable='on';note.Enable='on';confirm.Enable='on';for j=1:4,coords{j}.Enable='on';end
+  if ~isempty(result),reportButton.Enable='on';end
   if ~isempty(result) && any(string(analysisTable.Status)=="PASS"),chosen.Enable='on';saveButton.Enable='on';end
  end
  function showPreview(~,~)
@@ -100,7 +102,8 @@ setappdata(f,'App',app);
    assert(~isfolder(out)&&~isfile(out),'Choose a new temporary analysis folder.');
    result=[];analysisTable=[];cleanup=onCleanup(@() removeTemp(out));
    measured=camera41exposure.workflow.prepareDigitizationExposure(files,OutputRoot=out,ROI=roi,LightSetup=string(light.Value),BaseFogNote=string(note.Value));
-   t=readtable(fullfile(out,'exposure_summary.csv'));summary.Data=t;summary.ColumnName=t.Properties.VariableNames;
+   t=readtable(fullfile(out,'exposure_summary.csv'));
+   [displayTable,reportLines]=camera41exposure.explainResults(t,measured);summary.Data=displayTable;summary.ColumnName=displayTable.Properties.VariableNames;summary.ColumnWidth={150,65,65,85,110,350};
    analysisTable=t;result=measured;
    channels=["R","G1","G2","B"];signals=zeros(height(t),4);margins=signals;
    for j=1:4,signals(:,j)=t.(char("MedianSignalCodes_"+channels(j)));margins(:,j)=t.(char("HeadroomEV_"+channels(j)));end
@@ -114,7 +117,15 @@ setappdata(f,'App',app);
     pick=find(t.ShutterSeconds(passing)==result.Selection.CandidateShutterSeconds,1);if isempty(pick),pick=1;end;chosen.Value=char(string(passing(pick)));
    end
 
-   s=result.Selection;status.Value=cellstr(["Candidate time (seconds): "+string(jsonencode(s.CandidateShutterSeconds));"Selection: "+string(s.Status);"Linearity: "+string(s.Linearity.Status);"Suggested next test (seconds): "+string(jsonencode(s.SuggestedNextShutterSeconds));"Select a measured passing time below, then save the JSON for PRE. It follows the film profile to NEG.";"Verify the proposed time with a new capture. Temporal noise has not been measured."]);
+   status.Value=cellstr(reportLines);
+  catch err,report(err);end
+ end
+ function saveReport(~,~)
+  [name,folder]=camera41exposure.fileDialog("save",f,'*.json','Save full exposure report, including FAIL results','exposure_report.json');if isequal(name,0),return;end
+  try
+   saved=result;saved.Measurements=table2struct(analysisTable);[~,lines]=camera41exposure.explainResults(analysisTable,result);saved.Report=cellstr(lines);
+   saved.OutputFiles=struct('Scope','Self-contained measurement report; no exposure selected.');
+   fid=fopen(fullfile(string(folder),string(name)),'w','n','UTF-8');assert(fid>=0);cleanup=onCleanup(@() fclose(fid));fprintf(fid,'%s\n',jsonencode(saved));
   catch err,report(err);end
  end
  function saveResult(~,~)

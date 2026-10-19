@@ -13,3 +13,5 @@
 Valet gäller digitalkamerans exponering vid negativinläsning. Verifiera tiden med en ny bild. Testet mäter inte tidsmässigt brus och skapar inte en fullständig produktionskvalificering. Originalbilderna ändras inte. Inställningar återställs inte efter stängning. JSON-filen är fristående och behöver ingen tillfällig analysmapp.
 
 MATLAB och den medföljande LibRaw-proben krävs. Apple Silicon-proben är verifierad på denna dator. Vid flytt kan proben behöva byggas om med `tools/build_raw_probe.sh` och installerat LibRaw/pkg-config. Programmet har GPL-3.0-or-later-licens; se LICENSE och third_party/licenses.
+
+Vid FAIL visar rapporten vilka kanaler som överskrider gränsen, signal i koder, marginal i EV och andel pixlar vid/över gränsen. **Save report** sparar mätningar och förklaringar även utan en godkänd tid. En enda RAW kan bedömas, men flera exponeringstider behövs för jämförelse och proportionalitetskontroll. Standardområdet i övre vänstra hörnet ska ersättas med en representativ ren filmbasregion.
