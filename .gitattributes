@@ -1,0 +1,3 @@
+*.pdf binary
+*.dylib binary
+tools/bin/camera41_raw_probe* -text

@@ -14,3 +14,17 @@ Exposure_*/
 logs/
 
 tmp/
+
+dist/
+*.NEF
+*.nef
+*.ARW
+*.arw
+*.RAF
+*.raf
+*.RW2
+*.rw2
+*.ORF
+*.orf
+*.PEF
+*.pef

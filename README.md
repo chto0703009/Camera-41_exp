@@ -1,4 +1,6 @@
-# Camera-41 Exposure
+# Camera-41 Exposure v0.1.0
+
+For download/setup requirements, see [INSTALL.md](INSTALL.md) and [CHANGELOG.md](CHANGELOG.md).
 
 Open `start.m` in MATLAB and press Run, or call `startCamera41_exposure` from this folder.
 

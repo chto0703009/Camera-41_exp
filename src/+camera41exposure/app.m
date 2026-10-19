@@ -8,7 +8,8 @@ folderTimer=tic;camera41exposure.logEvent('folder.check.begin',struct('Folder',l
 if ~isfolder(lastRAWFolder),lastRAWFolder=string(java.lang.System.getProperty('user.home'));end
 camera41exposure.logEvent('folder.check.complete',struct('Folder',lastRAWFolder,'Seconds',toc(folderTimer)));
 files=strings(0,1);selected=1;previewFile="";rectangle=[];running=false;result=[];analysisTable=[];visibleSize=[];manualRequired=false;manualReady=false;manualReason="";
-f=uifigure('Name','Camera-41 Exposure – digital camera setup','Tag','Camera41ExposureApp','Visible',options.Visible,'Position',[80 80 1250 820]);
+appRoot=fileparts(fileparts(fileparts(mfilename('fullpath'))));appVersion=strtrim(string(fileread(fullfile(appRoot,'VERSION'))));
+f=uifigure('Name',char("Camera-41 Exposure v"+appVersion+" - digital camera setup"),'Tag','Camera41ExposureApp','Visible',options.Visible,'Position',[80 80 1250 820]);
 f.CloseRequestFcn=@closeApp;
 logPath=camera41exposure.logEvent('window.created',struct());
 menu=uimenu(f,'Text','Log');uimenu(menu,'Text','Open complete log','MenuSelectedFcn',@(~,~)edit(logPath));
