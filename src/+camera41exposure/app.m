@@ -3,6 +3,8 @@ function app=app(options)
 arguments
  options.Visible (1,1) string="on"
 end
+lastRAWFolder=string(getpref('Camera41Exposure','LastRAWFolder',char(java.lang.System.getProperty('user.home'))));
+if ~isfolder(lastRAWFolder),lastRAWFolder=string(java.lang.System.getProperty('user.home'));end
 files=strings(0,1);selected=1;previewFile="";rectangle=[];running=false;result=[];analysisTable=[];
 f=uifigure('Name','Camera-41 Exposure – digital camera setup','Tag','Camera41ExposureApp','Visible',options.Visible,'Position',[80 80 1250 820]);
 f.CloseRequestFcn=@closeApp;
@@ -37,7 +39,7 @@ saveButton=uibutton(foot,'Text','Save selected time as JSON …','Enable','off',
 reportButton=uibutton(foot,'Text','Save report …','Enable','off','ButtonPushedFcn',@saveReport);
 
 uibutton(foot,'Text','Close','ButtonPushedFcn',@closeApp);
-app=struct('Figure',f,'Controls',struct('Add',add,'Remove',remove,'Preview',preview,'DrawROI',draw,'Analyse',run,'Light',light,'Note',note,'Confirmed',confirm,'ROI',{coords},'Files',list,'Summary',summary,'Status',status,'ExposureTime',chosen,'Save',saveButton,'SaveReport',reportButton,'SignalAxes',signalAxes,'MarginAxes',marginAxes),'SetFiles',@setFiles,'AnalyseTo',@analyse,'SaveTo',@saveTo);
+app=struct('Figure',f,'Controls',struct('Add',add,'Remove',remove,'Preview',preview,'DrawROI',draw,'Analyse',run,'Light',light,'Note',note,'Confirmed',confirm,'ROI',{coords},'Files',list,'Summary',summary,'Status',status,'ExposureTime',chosen,'Save',saveButton,'SaveReport',reportButton,'SignalAxes',signalAxes,'MarginAxes',marginAxes),'SetFiles',@setFiles,'AnalyseTo',@analyse,'SaveTo',@saveTo,'GetLastRAWFolder',@() lastRAWFolder);
 setappdata(f,'App',app);
  function changed(~,~)
   result=[];analysisTable=[];chosen.Enable='off';saveButton.Enable='off';reportButton.Enable='off';cla(signalAxes);cla(marginAxes);summary.Data={};status.Value={'Settings changed. Analyse again to obtain a result for these settings.'};
@@ -47,8 +49,10 @@ setappdata(f,'App',app);
   files=unique(paths,'stable');selected=1;previewFile="";cla(ax);list.Data=cellstr(files);changed();
  end
  function addFiles(~,~)
-  [names,folder]=camera41exposure.fileDialog("open",f,{'*.CR2;*.cr2;*.CR3;*.cr3;*.NEF;*.nef;*.ARW;*.arw;*.DNG;*.dng;*.RAF;*.raf;*.RW2;*.rw2;*.ORF;*.orf;*.PEF;*.pef','RAW files'},'Select film-base exposure bracket','MultiSelect','on');
+  drawnow;
+  [names,folder]=camera41exposure.fileDialog("open",f,{'*.CR2;*.cr2;*.CR3;*.cr3;*.NEF;*.nef;*.ARW;*.arw;*.DNG;*.dng;*.RAF;*.raf;*.RW2;*.rw2;*.ORF;*.orf;*.PEF;*.pef','RAW files'},'Select film-base exposure bracket',char(lastRAWFolder+filesep),'MultiSelect','on');
   if isequal(names,0),return;end
+  lastRAWFolder=string(folder);setpref('Camera41Exposure','LastRAWFolder',char(lastRAWFolder));
   try,setFiles([files;camera41exposure.selectedPaths(folder,names)]);catch err,report(err);end
  end
  function select(~,event),if ~isempty(event.Indices),selected=event.Indices(1,1);end,end
