@@ -1,0 +1,11 @@
+{
+  "BinarySHA256": "49c02bd3cbd0ee8047be01ec16cd11ee3049eadcb8fdf4870819e72ca23b37a1",
+  "BinarySizeBytes": 846143,
+  "BuildPlatform": "macOS-26.6.1-arm64-arm-64bit-Mach-O",
+  "Compiler": "Apple clang version 12.0.0 (clang-1200.0.32.29)",
+  "LibRawVersion": "0.22.1-Release",
+  "ProbeArchitecture": "arm64",
+  "Schema": "camera41.raw-probe-build.v0.2",
+  "SourceSHA256": "013750539d58f319dd7b637c32c2a5387fae811a8ce7fd7d32cf38aa0b3d511f",
+  "Status": "VALID"
+}

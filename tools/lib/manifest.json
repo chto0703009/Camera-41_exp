@@ -1,0 +1,27 @@
+{
+  "Schema": "camera41.bundled-native-libraries.v1",
+  "Platform": "macOS",
+  "Libraries": [
+    {
+      "File": "tools/lib/libraw.25.dylib",
+      "Source": "/usr/local/opt/libraw/lib/libraw.25.dylib",
+      "SHA256": "f7b235eaac212d44154ecaf54386b404fb3b654cf0d246002af676bdabbd3af3"
+    },
+    {
+      "File": "tools/lib/liblcms2.2.dylib",
+      "Source": "/usr/local/opt/little-cms2/lib/liblcms2.2.dylib",
+      "SHA256": "1f6d407a0724eee76e1a2383f5da2515079c6d1002c181b6acfb7a69010bccde"
+    },
+    {
+      "File": "tools/lib/libomp.dylib",
+      "Source": "/usr/local/opt/libomp/lib/libomp.dylib",
+      "SHA256": "06f1e5ecbaf26706f608032efa0ff5066616e7c00a52967a472082b13666fb1c"
+    },
+    {
+      "File": "tools/lib/libjpeg.8.dylib",
+      "Source": "/usr/local/opt/jpeg-turbo/lib/libjpeg.8.dylib",
+      "SHA256": "5b2f395d52c0dfab864b5eefcce094d5c16394dfb7d2580d3e686c6edb82c360"
+    }
+  ],
+  "SystemLibraries": "macOS /usr/lib and /System/Library remain operating-system dependencies"
+}
