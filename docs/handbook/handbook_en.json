@@ -27,6 +27,32 @@
       ]
     },
     {
+      "title": "Installation and startup",
+      "intro": "Exposure v0.1.0 runs in MATLAB. Python and a Python virtual environment (venv) are not required. PRE and NEG do not need to be installed.",
+      "sections": [
+        [
+          "1. Download and extract",
+          "Follow the GitHub link in the footer and select Releases > v0.1.0. Download camera-41_exposure-v0.1.0-macos.zip and extract the entire archive into a local writable folder. Keep src, tools, VERSION and the other supplied files together; do not move only start.m."
+        ],
+        [
+          "2. Start in MATLAB",
+          "Open MATLAB, open start.m from the extracted app folder and press Run. Alternatively, set that folder as MATLAB's Current Folder and enter startCamera41_exposure; in the Command Window. The main application window opens."
+        ],
+        [
+          "Requirements and supplied RAW reader",
+          "Verified environment: macOS on Apple Silicon with MATLAB R2025b. Image Processing Toolbox is needed for manual region editing with drawrectangle. MATLAB requires its own licence. The supplied LibRaw reader is selected for the Mac architecture. No Homebrew installation is needed in the verified environment. An Intel reader and libraries are included, but MATLAB operation on a physical Intel Mac has not been verified. Windows, Linux and older MATLAB releases are not qualified for this release."
+        ],
+        [
+          "After installation or an update",
+          "No sample photographs are included. Add your own files with Add FB+F RAW files. The log is created at logs/camera41_exposure.jsonl inside the app folder; use Log > Open complete log. Close the Exposure window before replacing program files, then restart the app. If macOS blocks the downloaded reader, inspect the security message and local log."
+        ],
+        [
+          "Check the download",
+          "The release page includes SHA256SUMS.txt. On macOS, compare a file using shasum -a 256 followed by its filename. RELEASE_MANIFEST.json inside the ZIP records the source commit and per-file checksums. INSTALL.md also contains the full installation instructions."
+        ]
+      ]
+    },
+    {
       "title": "Capture files and select an area",
       "intro": "Use an empty film frame containing base plus fog from the film being scanned. A negative with a scene, text, perforations or a holder edge is not a suitable empty FB+F area.",
       "sections": [

@@ -27,6 +27,32 @@
       ]
     },
     {
+      "title": "Installation och start",
+      "intro": "Exposure v0.1.0 körs i MATLAB. Ingen Python-installation eller virtuell Python-miljö (venv) behövs. PRE och NEG behöver inte vara installerade.",
+      "sections": [
+        [
+          "1. Hämta och packa upp",
+          "Öppna GitHub-länken i sidfoten och välj Releases > v0.1.0. Hämta camera-41_exposure-v0.1.0-macos.zip och packa upp hela arkivet i en lokal mapp där du har skrivrättighet. Behåll src, tools, VERSION och övriga filer tillsammans; flytta inte bara start.m."
+        ],
+        [
+          "2. Starta i MATLAB",
+          "Öppna MATLAB och öppna start.m i den uppackade appmappen. Tryck Run. Alternativt: välj appmappen som Current Folder och skriv startCamera41_exposure; i Command Window. Programmets huvudfönster öppnas."
+        ],
+        [
+          "Krav och medföljande RAW-läsare",
+          "Verifierad miljö: macOS på Apple Silicon med MATLAB R2025b. Image Processing Toolbox behövs för manuell områdesredigering med drawrectangle. MATLAB har egen licens. LibRaw-läsaren medföljer och väljs efter Mac-arkitektur. Ingen Homebrew-installation behövs i den verifierade miljön. Intel-läsare och bibliotek ingår, men körning i MATLAB på en fysisk Intel-Mac är inte verifierad. Windows, Linux och äldre MATLAB-versioner är inte kvalificerade för denna release."
+        ],
+        [
+          "Efter installation eller uppdatering",
+          "Inga provbilder ingår. Lägg till egna RAW-filer med Add FB+F RAW files. Loggen skapas i logs/camera41_exposure.jsonl i appmappen; öppna den via Log > Open complete log. Stäng Exposure-fönstret innan programfiler byts ut och starta sedan om appen. Om macOS blockerar den hämtade läsaren, granska säkerhetsmeddelandet och loggen."
+        ],
+        [
+          "Kontrollera hämtningen",
+          "Release-sidan innehåller SHA256SUMS.txt. På macOS kan du jämföra en fil med kommandot shasum -a 256 följt av filnamnet. ZIP-paketets RELEASE_MANIFEST.json anger källkodens commit och kontrollsummor för filerna. Fullständiga installationsuppgifter finns även i INSTALL.md."
+        ]
+      ]
+    },
+    {
       "title": "Ta bilder och välj mätområde",
       "intro": "Använd en tom filmruta med bas + slöja från den film som ska läsas in. Ett negativ med motiv, text, perforering eller hållarkant är ingen lämplig tom FB+F-yta.",
       "sections": [
