@@ -14,7 +14,7 @@ logPath=camera41exposure.logEvent('window.created',struct());
 menu=uimenu(f,'Text','Log');uimenu(menu,'Text','Open complete log','MenuSelectedFcn',@(~,~)edit(logPath));
 g=uigridlayout(f,[8 1]);g.RowHeight={42,38,60,40,34,'1x',150,36};
 uilabel(g,'Text',{'Choose the digital-camera shutter time at a fixed, selected aperture using blank film base + fog RAWs.', ...
- 'Compare signal and clipping margin, then save the selected time for PRE and NEG. Measurement area selection is automatic.'}, ...
+ 'Compare signal and clipping margin, then save JSON for PRE. PRE includes it in the film characterisation exported to NEG.'}, ...
  'WordWrap','on','Tag','Camera41ExposurePurpose');
 bar=uigridlayout(g,[1 4]);bar.Padding=[0 0 0 0];
 add=uibutton(bar,'Text','Add FB+F RAW files …','ButtonPushedFcn',@addFiles);
@@ -187,7 +187,7 @@ setappdata(f,'App',app);areaMode();
   saved.OutputFiles=struct('Scope','Measurements embedded in this JSON; no external analysis folder required.');
   fid=fopen(file,'w','n','UTF-8');assert(fid>=0,'Could not save JSON.');cleanup=onCleanup(@() fclose(fid));fprintf(fid,'%s\n',jsonencode(saved));
   camera41exposure.logEvent('selection.saved',struct('File',string(file),'Selection',saved.OperatorSelection));
-  status.Value=cellstr(["Selected digitising-camera time: "+saved.OperatorSelection.ShutterSeconds+" s";"Saved: "+string(file);"Import this JSON in PRE tab 7. It accompanies the exported film characterisation to NEG."]);
+  status.Value=cellstr(["Selected digitising-camera time: "+saved.OperatorSelection.ShutterSeconds+" s";"Saved: "+string(file);"Import this JSON in PRE tab 7. PRE embeds it in the film characterisation; no separate JSON import in NEG is needed."]);
  end
  function report(err)
   camera41exposure.logEvent('error',struct('Identifier',err.identifier,'Message',err.message,'Report',getReport(err,'extended','hyperlinks','off')));
