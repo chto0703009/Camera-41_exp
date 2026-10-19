@@ -42,12 +42,13 @@ setappdata(f,'App',app);
   result=[];analysisTable=[];chosen.Enable='off';saveButton.Enable='off';cla(signalAxes);cla(marginAxes);summary.Data={};status.Value={'Settings changed. Analyse again to obtain a result for these settings.'};
  end
  function setFiles(paths)
-  assert(~running,'An operation is running.');paths=string(paths(:));assert(all(isfile(paths)),'RAW file missing.');
+  assert(~running,'An operation is running.');paths=string(paths);paths=paths(:);missing=paths(~isfile(paths));assert(isempty(missing),'RAW file missing: %s',join(missing,newline));
   files=unique(paths,'stable');selected=1;previewFile="";cla(ax);list.Data=cellstr(files);changed();
  end
  function addFiles(~,~)
   [names,folder]=camera41exposure.fileDialog("open",f,{'*.CR2;*.cr2;*.CR3;*.cr3;*.NEF;*.nef;*.ARW;*.arw;*.DNG;*.dng;*.RAF;*.raf;*.RW2;*.rw2;*.ORF;*.orf;*.PEF;*.pef','RAW files'},'Select film-base exposure bracket','MultiSelect','on');
-  if isequal(names,0),return;end;setFiles([files;fullfile(string(folder),string(names(:)))]);
+  if isequal(names,0),return;end
+  try,setFiles([files;camera41exposure.selectedPaths(folder,names)]);catch err,report(err);end
  end
  function select(~,event),if ~isempty(event.Indices),selected=event.Indices(1,1);end,end
  function removeFile(~,~)
