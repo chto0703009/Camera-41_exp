@@ -1,5 +1,7 @@
 # Camera-41 Exposure v0.1.0
 
+[English summary and installation (PDF)](output/pdf/Camera41_Exposure_Summary_EN.pdf)
+
 For download/setup requirements, see [INSTALL.md](INSTALL.md) and [CHANGELOG.md](CHANGELOG.md).
 
 Open `start.m` in MATLAB and press Run, or call `startCamera41_exposure` from this folder.
@@ -14,8 +16,8 @@ MATLAB and the bundled LibRaw probe are required. Original RAWs are unchanged. A
 
 ## Handbooks / Handböcker
 
-- [Svensk handbok (PDF)](output/pdf/Camera41_Exposure_Handbook_SV.pdf)
 - [English handbook (PDF)](output/pdf/Camera41_Exposure_Handbook_EN.pdf)
+- [Svensk handbok (PDF)](output/pdf/Camera41_Exposure_Handbook_SV.pdf)
 
 Editable sources are in `docs/handbook/handbook_sv.json` and `handbook_en.json`. Rebuild both PDFs with `python tools/build_handbooks.py` (requires reportlab). The handbooks describe why FB+F exposure is used to avoid clipping, capture setup, automatic/manual areas, results, standalone operation and logging.
 
