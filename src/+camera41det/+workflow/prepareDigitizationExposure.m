@@ -27,28 +27,28 @@ out=options.OutputRoot;assert(~isfolder(out) && ~isfile(out),'Camera41:Exposure:
 n=numel(inputs);times=zeros(n,1);statuses=strings(n,1);headroom=zeros(n,4);signals=zeros(n,4);above=zeros(n,4);reports=cell(n,1);
 sources=struct('Path',{},'SHA256',{});areaChecks=cell(n,1);
 for k=1:n
- decodeTimer=tic;camera41exposure.logEvent('raw.decode.begin',struct('Index',k,'Count',n,'File',inputs(k)));
- decoded=camera41exposure.raw.decode(inputs(k),OutputRoot=fullfile(out,'decode'));
- camera41exposure.logEvent('raw.decode.complete',struct('File',inputs(k),'Seconds',toc(decodeTimer)));
+ decodeTimer=tic;camera41det.logEvent('raw.decode.begin',struct('Index',k,'Count',n,'File',inputs(k)));
+ decoded=camera41det.raw.decode(inputs(k),OutputRoot=fullfile(out,'decode'));
+ camera41det.logEvent('raw.decode.complete',struct('File',inputs(k),'Seconds',toc(decodeTimer)));
  assessmentTimer=tic;
  if k==1,body=string(decoded.CameraIdentity.BodyIdentifierSHA256);iso=decoded.LibRaw.iso;aperture=decoded.LibRaw.aperture;dimensions=[decoded.LibRaw.visible_width decoded.LibRaw.visible_height];end
  assert(string(decoded.CameraIdentity.BodyIdentifierSHA256)==body && decoded.LibRaw.iso==iso && abs(decoded.LibRaw.aperture-aperture)<1e-12 && isequal([decoded.LibRaw.visible_width decoded.LibRaw.visible_height],dimensions), ...
  'Camera41:Exposure:CaptureMismatch','All samples must use the same camera, ISO, aperture and image dimensions.');
  if options.AutomaticArea
   data=load(fullfile(decoded.ResultFolder,decoded.Outputs.LinearSensorFile),'linearMosaic');
-  [automaticROI,areaCheck]=camera41exposure.automaticArea(data.linearMosaic);areaChecks{k}=areaCheck;
+  [automaticROI,areaCheck]=camera41det.automaticArea(data.linearMosaic);areaChecks{k}=areaCheck;
   if k==1,options.ROI=automaticROI;end
-  camera41exposure.logEvent('roi.automatic',struct('File',inputs(k),'Check',areaCheck));
+  camera41det.logEvent('roi.automatic',struct('File',inputs(k),'Check',areaCheck));
   assert(~areaCheck.NeedsManualReview,'Camera41:Exposure:FBFStructure','%s: %s Förhandsvisa bilden och justera den markerade rutan.',inputs(k),join(string(areaCheck.Reasons),' '));
  end
- r=camera41exposure.raw.assessValoiCapture(decoded,options.ROI,PassMarginEV=options.PassMarginEV,FailFraction=options.FailFraction);
- camera41exposure.logEvent('raw.assessment.complete',struct('File',inputs(k),'Seconds',toc(assessmentTimer),'Status',r.Status,'Channels',r.Channels));
+ r=camera41det.raw.assessValoiCapture(decoded,options.ROI,PassMarginEV=options.PassMarginEV,FailFraction=options.FailFraction);
+ camera41det.logEvent('raw.assessment.complete',struct('File',inputs(k),'Seconds',toc(assessmentTimer),'Status',r.Status,'Channels',r.Channels));
  reports{k}=r;times(k)=r.CameraSettings.ShutterSeconds;statuses(k)=string(r.Status);
  headroom(k,:)=[r.Channels.HeadroomEV];signals(k,:)=[r.Channels.MedianSignalCodes];above(k,:)=[r.ExposureAssessment.Channels.AboveLinearityFraction];
  sources(end+1)=struct('Path',inputs(k),'SHA256',string(decoded.Source.SHA256));
 end
 [times,order]=sort(times);inputs=inputs(order);statuses=statuses(order);headroom=headroom(order,:);signals=signals(order,:);above=above(order,:);reports=reports(order);sources=sources(order);areaChecks=areaChecks(order);
-selection=camera41exposure.workflow.selectDigitizationExposure(times,statuses,signals,LinearityTolerance=options.LinearityTolerance);
+selection=camera41det.workflow.selectDigitizationExposure(times,statuses,signals,LinearityTolerance=options.LinearityTolerance);
 summary=table(inputs,times,statuses,min(headroom,[],2),'VariableNames',{'RAWFile','ShutterSeconds','Status','MinimumHeadroomEV'});
 channels=["R","G1","G2","B"];
 for k=1:4

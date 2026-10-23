@@ -1,0 +1,49 @@
+{
+  "Version": "0.1.1",
+  "Date": "2026-10-23",
+  "MATLAB": "R2025b Update 7 / 25.2.0.3360999",
+  "Platform": "macOS Apple Silicon",
+  "Checks": [
+    "EXPOSURE_TESTS_PASS",
+    "FAIL_REPORT_PASS",
+    "AUTOMATIC_AREA_PASS",
+    "DIALOG_CLEANUP_PASS",
+    "RELEASE_TESTS_PASS",
+    "REAL_RAW_APP_SMOKE_PASS"
+  ],
+  "RawFixture": {
+    "FileName": "Valoi_20260907_634.CR2",
+    "MeasurementStatus": "REVIEW",
+    "MinimumHeadroomEV": 0.32109,
+    "NoNewPhysicalQualification": true
+  },
+  "NativeReaders": "Unchanged from v0.1.0; physical Intel not tested",
+  "Handbooks": "SV/EN, five pages each; summaries one page each; rendered and visually checked",
+  "TestedSourceSHA256": {
+    "src/+camera41det/+integrity/canonicalJSON.m": "0438cc780312ccc6b13b20dc51e33c3b7930c1619353d1002d66de8927c3e996",
+    "src/+camera41det/+integrity/sha256Text.m": "67ff3a2a60b441540a463d38e6f1651f7539360efe422643a39155e5ed0bd2b7",
+    "src/+camera41det/+raw/assessValoiCapture.m": "ce4300b1b6146e88a54b0b047022452d90b0a1b1204af137e662dac13ecc24af",
+    "src/+camera41det/+raw/checkFilmBaseExposure.m": "01ba1556d807c357713194fcdd6b12fd60551dee29a2ddf73cb859122b48530e",
+    "src/+camera41det/+raw/decode.m": "5f3eeb6f69ecb079e3ffa9d6165332e9fc21c83e8b1aded3acd3bcbe25401958",
+    "src/+camera41det/+runtime/rawProbeExecutable.m": "8032956426162458f78905ef5f2a35ce04672fd2298d19c8cd03af1a759897a2",
+    "src/+camera41det/+workflow/prepareDigitizationExposure.m": "48add0c73aee77f1d401bf35fe4806b18f4b505d527cef5f99ed27e10061da36",
+    "src/+camera41det/+workflow/selectDigitizationExposure.m": "4c328c41c33172a317c0664891355d6a800e391bb7403650a84a0b338f42a5ae",
+    "src/+camera41det/alertFocus.m": "9e8aeafc4e38cf0e970a5ef8d7c6838b461de8ef8b19a5af055063529ee444d7",
+    "src/+camera41det/app.m": "9b9093fb6cc7cf48b68d50f247bf3fe782e2010daa5b756dd9956f01896f3007",
+    "src/+camera41det/automaticArea.m": "74280cba4576f6cee55426426c757f871f2c70b65e0079788708f684fa89dfd3",
+    "src/+camera41det/clampArea.m": "aa56c7756e5be3c6e8e67823e8fa8c064439530732a97d5bb316ae35e78e5e72",
+    "src/+camera41det/explainResults.m": "532ca4c9fd01a4e31857f94ed0fc476a3c77de5d19876d752cf1c38444cb0ce2",
+    "src/+camera41det/fileDialog.m": "5b73af5bd1e2ecefd3eaf681d01c97568f1e27311bf2268474b64ba67a14bb36",
+    "src/+camera41det/logEvent.m": "03afedc5c9b1621d14f24efd5e24d8d6b2df5c702d62137d16af09be5a70b182",
+    "src/+camera41det/restoreFocus.m": "2b585e5a9cd47bb662900469f96d69f37b9e034462ade69aec36cb37fc2ee0d6",
+    "src/+camera41det/selectedPaths.m": "0f1f5566ee367a52eeda4d6159011bc59b61e443b58f34f7080212c26d7748fc",
+    "start.m": "271fd0ea10be435e62b7ea80e8849476d8cb81fb8e3be99c313bb8538992164d",
+    "startCamera41_det.m": "9f9fa1361a277f6a0213f548fc828dbc20180f44f84240424bc9426deee0effc",
+    "tests/run_automatic_area_tests.m": "f2ba09a5a24e8d24e4d488f9627ef450d4f2d7ffe607794f0895621f293cd88b",
+    "tests/run_dialog_cleanup_tests.m": "15670c26599054a30e0e0ddf433c6df384bf28a4d8dae49970e1397f71ff5225",
+    "tests/run_exposure_report_tests.m": "2b5dada5dba5adeb161e724f79ae8921204f06b3dc0267e6fb01a73b06432fbe",
+    "tests/run_exposure_tests.m": "385ba16e827712df06281ccb28ba943f6148e042adc1952060724429afd07fad",
+    "tests/run_raw_smoke_test.m": "db9b65d5f6a8f05835f50b8f86ec3555254b56532861afad7bfd5087981ade1a",
+    "tests/run_release_tests.m": "84a2e774284204aecadb8d9ea43faf5014a29b4a6606eb7a91a093d9508c7968"
+  }
+}

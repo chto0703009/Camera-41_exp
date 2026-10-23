@@ -1,4 +1,4 @@
-% Open Camera-41 Exposure: open this script in MATLAB and press Run.
+% Open Camera-41_det: open this script in MATLAB and press Run.
 exposureAppFolder=fileparts(mfilename('fullpath'));
 addpath(exposureAppFolder);
-startCamera41_exposure;
+startCamera41_det;

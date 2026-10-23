@@ -4,7 +4,7 @@ if ~isgraphics(parent)
  for k=1:nargout,if kind=="input",varargout{k}={};else,varargout{k}=0;end;end
  return
 end
-started=tic;camera41exposure.logEvent('dialog.enter',struct('Kind',kind,'Arguments',{varargin}));
+started=tic;camera41det.logEvent('dialog.enter',struct('Kind',kind,'Arguments',{varargin}));
 cleanup=onCleanup(@()restoreDialogFocus(parent,kind));
 try
 switch kind
@@ -14,9 +14,9 @@ switch kind
  case "input",[varargout{1:nargout}]=inputdlg(varargin{:});
  otherwise,error('Camera41:Pre:DialogKind','Unknown dialog kind.');
 end
-camera41exposure.logEvent('dialog.return',struct('Kind',kind,'Seconds',toc(started),'IncludesUserSelectionTime',true));
+camera41det.logEvent('dialog.return',struct('Kind',kind,'Seconds',toc(started),'IncludesUserSelectionTime',true));
 catch err
- camera41exposure.logEvent('dialog.error',struct('Kind',kind,'Seconds',toc(started),'Report',getReport(err,'extended','hyperlinks','off')));rethrow(err);
+ camera41det.logEvent('dialog.error',struct('Kind',kind,'Seconds',toc(started),'Report',getReport(err,'extended','hyperlinks','off')));rethrow(err);
 end
 % A user may close the parent while a native chooser is open.
 if ~isgraphics(parent)
@@ -25,6 +25,6 @@ end
 end
 function restoreDialogFocus(parent,kind)
 % Values are captured by onCleanup; no nested exiting workspace is accessed.
-focusTimer=tic;camera41exposure.restoreFocus(parent);
-camera41exposure.logEvent('dialog.focus_restored',struct('Kind',kind,'Seconds',toc(focusTimer)));
+focusTimer=tic;camera41det.restoreFocus(parent);
+camera41det.logEvent('dialog.focus_restored',struct('Kind',kind,'Seconds',toc(focusTimer)));
 end

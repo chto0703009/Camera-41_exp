@@ -1,10 +1,10 @@
-# Camera-41 Exposure licence notice
+# Camera-41_det licence notice
 
 Copyright (c) 2026 Christer Törnkvist.
 
 SPDX-License-Identifier: GPL-3.0-or-later
 
-Camera-41 Exposure's own program code and documentation are free and open-source
+Camera-41_det's own program code and documentation are free and open-source
 software under the GNU General Public License, version 3 or (at your option)
 any later version. The full licence text is in [LICENSE](LICENSE).
 
@@ -17,4 +17,4 @@ roll data do not acquire a new licence merely by being processed by the app.
 Repository access and licensing are separate: the repository is currently private.
 
 Christer Törnkvist - christer@borgasundsfotografiska.se
-https://github.com/chto0703009/camera-41_exposure
+https://github.com/chto0703009/Camera-41_det

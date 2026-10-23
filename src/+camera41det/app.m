@@ -3,20 +3,20 @@ function app=app(options)
 arguments
  options.Visible (1,1) string="on"
 end
-lastRAWFolder=string(getpref('Camera41Exposure','LastRAWFolder',char(java.lang.System.getProperty('user.home'))));
-folderTimer=tic;camera41exposure.logEvent('folder.check.begin',struct('Folder',lastRAWFolder));
+lastRAWFolder=string(getpref('Camera41Det','LastRAWFolder',getpref('Camera41Exposure','LastRAWFolder',char(java.lang.System.getProperty('user.home')))));
+folderTimer=tic;camera41det.logEvent('folder.check.begin',struct('Folder',lastRAWFolder));
 if ~isfolder(lastRAWFolder),lastRAWFolder=string(java.lang.System.getProperty('user.home'));end
-camera41exposure.logEvent('folder.check.complete',struct('Folder',lastRAWFolder,'Seconds',toc(folderTimer)));
+camera41det.logEvent('folder.check.complete',struct('Folder',lastRAWFolder,'Seconds',toc(folderTimer)));
 files=strings(0,1);selected=1;previewFile="";rectangle=[];running=false;result=[];analysisTable=[];visibleSize=[];manualRequired=false;manualReady=false;manualReason="";
 appRoot=fileparts(fileparts(fileparts(mfilename('fullpath'))));appVersion=strtrim(string(fileread(fullfile(appRoot,'VERSION'))));
-f=uifigure('Name',char("Camera-41 Exposure v"+appVersion+" - digital camera setup"),'Tag','Camera41ExposureApp','Visible',options.Visible,'Position',[80 80 1250 820]);
+f=uifigure('Name',char("Camera-41_det v"+appVersion+" - digital camera setup"),'Tag','Camera41DetApp','Visible',options.Visible,'Position',[80 80 1250 820]);
 f.CloseRequestFcn=@closeApp;
-logPath=camera41exposure.logEvent('window.created',struct());
+logPath=camera41det.logEvent('window.created',struct());
 menu=uimenu(f,'Text','Log');uimenu(menu,'Text','Open complete log','MenuSelectedFcn',@(~,~)edit(logPath));
 g=uigridlayout(f,[8 1]);g.RowHeight={42,38,60,40,34,'1x',150,36};
 uilabel(g,'Text',{'Choose the digital-camera shutter time at a fixed, selected aperture using blank film base + fog RAWs.', ...
  'Compare signal and clipping margin. Use the chosen time to capture current-film FB+F and a matched dark pair for measurement in PRE.'}, ...
- 'WordWrap','on','Tag','Camera41ExposurePurpose');
+ 'WordWrap','on','Tag','Camera41DetPurpose');
 bar=uigridlayout(g,[1 4]);bar.Padding=[0 0 0 0];
 add=uibutton(bar,'Text','Add FB+F RAW files …','ButtonPushedFcn',@addFiles);
 remove=uibutton(bar,'Text','Remove selected','ButtonPushedFcn',@removeFile);
@@ -57,78 +57,78 @@ setappdata(f,'App',app);areaMode();
  function timeChosen(~,~)
   if isempty(result)||string(chosen.Value)=="",return;end
   index=str2double(chosen.Value);status.Value=cellstr(["Chosen shutter time: "+analysisTable.ShutterSeconds(index)+" s";"Capture the current film's FB+F and two matched dark RAWs at this time, fixed ISO and aperture.";"Load those RAWs in PRE tab 7 to measure noise and S/N. No export from this app is required."]);
-  camera41exposure.logEvent('time.chosen',struct('Seconds',analysisTable.ShutterSeconds(index)));
+  camera41det.logEvent('time.chosen',struct('Seconds',analysisTable.ShutterSeconds(index)));
  end
  function changed(~,~)
-  camera41exposure.logEvent('settings.changed',struct('Light',light.Value,'Sample',note.Value,'ROI',cellfun(@(c)c.Value,coords),'Confirmed',confirm.Value));
+  camera41det.logEvent('settings.changed',struct('Light',light.Value,'Sample',note.Value,'ROI',cellfun(@(c)c.Value,coords),'Confirmed',confirm.Value));
   result=[];analysisTable=[];chosen.Enable='off';cla(signalAxes);cla(marginAxes);summary.Data={};status.Value={'Settings changed. Analyse again to obtain a result for these settings.'};
  end
  function setFiles(paths)
-  updateTimer=tic;camera41exposure.logEvent('files.update.begin',struct('Count',numel(string(paths))));
+  updateTimer=tic;camera41det.logEvent('files.update.begin',struct('Count',numel(string(paths))));
   assert(~running,'An operation is running.');paths=string(paths);paths=paths(:);missing=paths(~isfile(paths));assert(isempty(missing),'RAW file missing: %s',join(missing,newline));
-  files=unique(paths,'stable');selected=1;manualRequired=false;manualReady=false;automatic.Value=true;areaMode();previewFile="";cla(ax);list.Data=cellstr(files);changed();camera41exposure.logEvent('files.update.complete',struct('Count',numel(files),'Seconds',toc(updateTimer)));
+  files=unique(paths,'stable');selected=1;manualRequired=false;manualReady=false;automatic.Value=true;areaMode();previewFile="";cla(ax);list.Data=cellstr(files);changed();camera41det.logEvent('files.update.complete',struct('Count',numel(files),'Seconds',toc(updateTimer)));
  end
  function addFiles(~,~)
-  clickTimer=tic;camera41exposure.logEvent('raw_picker.click',struct('Folder',lastRAWFolder));
-  drawnow;camera41exposure.logEvent('raw_picker.before_dialog',struct('SecondsSinceClick',toc(clickTimer)));
-  [names,folder]=camera41exposure.fileDialog("open",f,{'*.CR2;*.cr2;*.CR3;*.cr3;*.NEF;*.nef;*.ARW;*.arw;*.DNG;*.dng;*.RAF;*.raf;*.RW2;*.rw2;*.ORF;*.orf;*.PEF;*.pef','RAW files'},'Select film-base exposure bracket',char(lastRAWFolder+filesep),'MultiSelect','on');
-  if isequal(names,0),camera41exposure.logEvent('raw_picker.cancel',struct('Seconds',toc(clickTimer)));return;end
-  camera41exposure.logEvent('raw_picker.selected',struct('Folder',string(folder),'Names',{cellstr(string(names))},'Seconds',toc(clickTimer)));
-  lastRAWFolder=string(folder);setpref('Camera41Exposure','LastRAWFolder',char(lastRAWFolder));
-  try,setFiles([files;camera41exposure.selectedPaths(folder,names)]);catch err,report(err);end
+  clickTimer=tic;camera41det.logEvent('raw_picker.click',struct('Folder',lastRAWFolder));
+  drawnow;camera41det.logEvent('raw_picker.before_dialog',struct('SecondsSinceClick',toc(clickTimer)));
+  [names,folder]=camera41det.fileDialog("open",f,{'*.CR2;*.cr2;*.CR3;*.cr3;*.NEF;*.nef;*.ARW;*.arw;*.DNG;*.dng;*.RAF;*.raf;*.RW2;*.rw2;*.ORF;*.orf;*.PEF;*.pef','RAW files'},'Select film-base exposure bracket',char(lastRAWFolder+filesep),'MultiSelect','on');
+  if isequal(names,0),camera41det.logEvent('raw_picker.cancel',struct('Seconds',toc(clickTimer)));return;end
+  camera41det.logEvent('raw_picker.selected',struct('Folder',string(folder),'Names',{cellstr(string(names))},'Seconds',toc(clickTimer)));
+  lastRAWFolder=string(folder);setpref('Camera41Det','LastRAWFolder',char(lastRAWFolder));
+  try,setFiles([files;camera41det.selectedPaths(folder,names)]);catch err,report(err);end
  end
  function select(~,event),if ~isempty(event.Indices),selected=event.Indices(1,1);end,end
  function removeFile(~,~)
   if isempty(files),return;end;files(selected)=[];setFiles(files);
  end
  function begin()
-  camera41exposure.logEvent('operation.busy',struct());
+  camera41det.logEvent('operation.busy',struct());
   assert(~running,'An operation is running.');running=true;
   for c=[add remove preview draw run chosen],c.Enable='off';end
   light.Enable='off';note.Enable='off';confirm.Enable='off';automatic.Enable='off';for j=1:4,coords{j}.Enable='off';end;drawnow;
  end
  function finish()
-  camera41exposure.logEvent('operation.finished',struct());
+  camera41det.logEvent('operation.finished',struct());
   running=false;if ~isvalid(f),return;end
   for c=[add remove preview draw run],c.Enable='on';end
   light.Enable='on';note.Enable='on';confirm.Enable='on';automatic.Enable='on';areaMode();for j=1:4,coords{j}.Enable='on';end
   if ~isempty(result) && any(string(analysisTable.Status)=="PASS"),chosen.Enable='on';end
  end
  function showPreview(~,~)
-  previewTimer=tic;camera41exposure.logEvent('preview.begin',struct('SelectedRow',selected));
+  previewTimer=tic;camera41det.logEvent('preview.begin',struct('SelectedRow',selected));
   temp="";
   try
    assert(~isempty(files),'Add RAW files first.');begin();done=onCleanup(@finish);
    status.Value={'Decoding selected RAW …'};drawnow;temp=string(tempname);mkdir(temp);cleanup=onCleanup(@() removeTemp(temp));
-   d=camera41exposure.raw.decode(files(selected),OutputRoot=temp);
+   d=camera41det.raw.decode(files(selected),OutputRoot=temp);
    data=load(fullfile(d.ResultFolder,d.Outputs.LinearSensorFile),'linearMosaic');m=data.linearMosaic;visibleSize=[size(m,2) size(m,1)];
    if automatic.Value || manualRequired
-    [area,areaCheck]=camera41exposure.automaticArea(m);for j=1:4,coords{j}.Value=area(j);end
+    [area,areaCheck]=camera41det.automaticArea(m);for j=1:4,coords{j}.Value=area(j);end
    end
    h=2*floor(size(m,1)/2);w=2*floor(size(m,2)/2);
    v=(m(1:2:h,1:2:w)+m(2:2:h,1:2:w)+m(1:2:h,2:2:w)+m(2:2:h,2:2:w))/4;
    imagesc(ax,[1 w],[1 h],sqrt(max(0,min(1,v(1:4:end,1:4:end)))));colormap(ax,gray);axis(ax,'image');ax.YDir='reverse';
-   views.SelectedTab=previewTab;title(ax,'Display only; measurement area uses native sensor pixels');previewFile=files(selected);rectangle=[];camera41exposure.logEvent('preview.complete',struct('File',previewFile,'Seconds',toc(previewTimer)));
-   rectangle=drawrectangle(ax,'Position',camera41exposure.clampArea(cellfun(@(c)c.Value,coords),visibleSize),'Color','y');addlistener(rectangle,'ROIMoved',@areaChanged);
+   views.SelectedTab=previewTab;title(ax,'Display only; measurement area uses native sensor pixels');previewFile=files(selected);rectangle=[];camera41det.logEvent('preview.complete',struct('File',previewFile,'Seconds',toc(previewTimer)));
+   rectangle=drawrectangle(ax,'Position',camera41det.clampArea(cellfun(@(c)c.Value,coords),visibleSize),'Color','y');addlistener(rectangle,'ROIMoved',@areaChanged);
    if manualRequired
     automatic.Value=false;areaMode();status.Value=cellstr(["VARNING: bilden avviker från förväntad tom FB+F. Det föreslagna området är markerat i gult. Justera rutan till ren filmbas + slöja.";manualReason]);
    else,status.Value={'Automatiskt mätområde är markerat i gult och undviker bildkanterna.'};end
   catch err,report(err);end
  end
  function drawArea(~,~)
-  camera41exposure.logEvent('roi.draw',struct());
+  camera41det.logEvent('roi.draw',struct());
   try
    assert(previewFile~="",'Preview a RAW first.');
    if ~isempty(rectangle)&&isvalid(rectangle),delete(rectangle);end
-   automatic.Value=false;areaMode();rectangle=drawrectangle(ax,'Position',camera41exposure.clampArea(cellfun(@(c)c.Value,coords),visibleSize),'Color','y');
+   automatic.Value=false;areaMode();rectangle=drawrectangle(ax,'Position',camera41det.clampArea(cellfun(@(c)c.Value,coords),visibleSize),'Color','y');
    addlistener(rectangle,'ROIMoved',@areaChanged);areaChanged();
   catch err,report(err);end
  end
  function areaChanged(~,~)
-  p=camera41exposure.clampArea(rectangle.Position,visibleSize);rectangle.Position=p;automatic.Value=false;manualReady=true;areaMode();for j=1:4,coords{j}.Value=p(j);end;changed();camera41exposure.logEvent('roi.changed',struct('ROI',p));
+  p=camera41det.clampArea(rectangle.Position,visibleSize);rectangle.Position=p;automatic.Value=false;manualReady=true;areaMode();for j=1:4,coords{j}.Value=p(j);end;changed();camera41det.logEvent('roi.changed',struct('ROI',p));
  end
  function analyse(out)
-  analysisTimer=tic;camera41exposure.logEvent('analysis.begin',struct('Files',{cellstr(files)},'ROI',cellfun(@(c)c.Value,coords)));
+  analysisTimer=tic;camera41det.logEvent('analysis.begin',struct('Files',{cellstr(files)},'ROI',cellfun(@(c)c.Value,coords)));
   if nargin==0,out=string(tempname);end
   try
    assert(~isempty(files),'Add RAW files first.');assert(confirm.Value,'Confirm that every RAW shows the same film-base sample.');
@@ -138,10 +138,10 @@ setappdata(f,'App',app);areaMode();
    begin();done=onCleanup(@finish);status.Value={'Analysing RAW exposures … Comparing signal and clipping margin.'};drawnow;
    assert(~isfolder(out)&&~isfile(out),'Choose a new temporary analysis folder.');
    result=[];analysisTable=[];cleanup=onCleanup(@() removeTemp(out));
-   measured=camera41exposure.workflow.prepareDigitizationExposure(files,OutputRoot=out,ROI=roi,AutomaticArea=automatic.Value,LightSetup=string(light.Value),BaseFogNote=string(note.Value));
+   measured=camera41det.workflow.prepareDigitizationExposure(files,OutputRoot=out,ROI=roi,AutomaticArea=automatic.Value,LightSetup=string(light.Value),BaseFogNote=string(note.Value));
    for j=1:4,coords{j}.Value=measured.ROI(j);end
    t=readtable(fullfile(out,'exposure_summary.csv'));
-   [displayTable,reportLines]=camera41exposure.explainResults(t,measured);summary.Data=displayTable;summary.ColumnName=displayTable.Properties.VariableNames;summary.ColumnWidth={150,65,65,85,110,350};
+   [displayTable,reportLines]=camera41det.explainResults(t,measured);summary.Data=displayTable;summary.ColumnName=displayTable.Properties.VariableNames;summary.ColumnWidth={150,65,65,85,110,350};
    analysisTable=t;result=measured;
    channels=["R","G1","G2","B"];signals=zeros(height(t),4);margins=signals;
    for j=1:4,signals(:,j)=t.(char("MedianSignalCodes_"+channels(j)));margins(:,j)=t.(char("HeadroomEV_"+channels(j)));end
@@ -155,23 +155,23 @@ setappdata(f,'App',app);areaMode();
     pick=find(t.ShutterSeconds(passing)==result.Selection.CandidateShutterSeconds,1);if isempty(pick),pick=1;end;chosen.Value=char(string(passing(pick)));
    end
 
-   status.Value=cellstr(reportLines);camera41exposure.logEvent('analysis.complete',struct('Seconds',toc(analysisTimer),'Selection',result.Selection,'Measurements',table2struct(t)));
+   status.Value=cellstr(reportLines);camera41det.logEvent('analysis.complete',struct('Seconds',toc(analysisTimer),'Selection',result.Selection,'Measurements',table2struct(t)));
   catch err
    if strcmp(err.identifier,'Camera41:Exposure:FBFStructure')
     manualRequired=true;manualReady=false;manualReason=string(err.message);
     hit=find(startsWith(string(err.message),files+":"),1);if ~isempty(hit),selected=hit;end
-    camera41exposure.logEvent('roi.manual_required',struct('Reason',err.message));
+    camera41det.logEvent('roi.manual_required',struct('Reason',err.message));
     clear done;clear cleanup;showPreview();
    else,report(err);end
   end
  end
  function report(err)
-  camera41exposure.logEvent('error',struct('Identifier',err.identifier,'Message',err.message,'Report',getReport(err,'extended','hyperlinks','off')));
-  status.Value={err.message};if options.Visible=="on",camera41exposure.alertFocus(f,err.message,'Exposure setup');else,rethrow(err);end
+  camera41det.logEvent('error',struct('Identifier',err.identifier,'Message',err.message,'Report',getReport(err,'extended','hyperlinks','off')));
+  status.Value={err.message};if options.Visible=="on",camera41det.alertFocus(f,err.message,'Exposure setup');else,rethrow(err);end
  end
  function closeApp(~,~)
-  camera41exposure.logEvent('window.close.request',struct('Running',running));
-  if running,status.Value={'Wait for the RAW operation to finish before closing.'};return;end;camera41exposure.logEvent('window.closed',struct());delete(f);
+  camera41det.logEvent('window.close.request',struct('Running',running));
+  if running,status.Value={'Wait for the RAW operation to finish before closing.'};return;end;camera41det.logEvent('window.closed',struct());delete(f);
  end
 end
 function removeTemp(folder)

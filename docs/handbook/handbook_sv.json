@@ -5,8 +5,8 @@
   "date": "19 oktober 2026",
   "pages": [
     {
-      "title": "Varför använda Exposure?",
-      "intro": "Camera-41 Exposure är ett fristående hjälpmedel för att välja digitalkamerans exponeringstid vid avfotografering av negativ, vid en fast vald bländare.",
+      "title": "Varför använda Camera-41_det?",
+      "intro": "Camera-41_det är ett fristående hjälpmedel för att välja digitalkamerans exponeringstid vid avfotografering av negativ, vid en fast vald bländare.",
       "sections": [
         [
           "Undvik klippning i RAW-bilden",
@@ -18,25 +18,25 @@
         ],
         [
           "Vad appen inte gör",
-          "Exposure mäter inte mörkerbrus eller fullständigt S/N och skapar ingen produktionskvalificering. Den styr inte kameran. Exponeringsvalet gäller digitalkameran vid inläsningen, inte den analoga exponeringen när filmen togs."
+          "Camera-41_det mäter inte mörkerbrus eller fullständigt S/N och skapar ingen produktionskvalificering. Den styr inte kameran. Exponeringsvalet gäller digitalkameran vid inläsningen, inte den analoga exponeringen när filmen togs."
         ],
         [
           "Snabbstart",
-          "1. Öppna start.m i MATLAB och tryck Run, eller kör startCamera41_exposure; från appmappen.\n2. Läs in en RAW-serie av samma tomma FB+F-prov med olika exponeringstider.\n3. Beskriv ljus och prov; bekräfta att samma prov visas i alla bilder.\n4. Tryck Analyse RAW images. Granska resultat och Exposure comparison.\n5. Välj en godkänd tid, ställ in kameran och kontrollera med en ny bild."
+          "1. Öppna start.m i MATLAB och tryck Run, eller kör startCamera41_det; från appmappen.\n2. Läs in en RAW-serie av samma tomma FB+F-prov med olika exponeringstider.\n3. Beskriv ljus och prov; bekräfta att samma prov visas i alla bilder.\n4. Tryck Analyse RAW images. Granska resultat och Exposure comparison.\n5. Välj en godkänd tid, ställ in kameran och kontrollera med en ny bild."
         ]
       ]
     },
     {
       "title": "Installation och start",
-      "intro": "Exposure v0.1.0 körs i MATLAB. Ingen Python-installation eller virtuell Python-miljö (venv) behövs. PRE och NEG behöver inte vara installerade.",
+      "intro": "Camera-41_det v0.1.1 körs i MATLAB. Ingen Python-installation eller virtuell Python-miljö (venv) behövs. PRE och NEG behöver inte vara installerade.",
       "sections": [
         [
           "1. Hämta och packa upp",
-          "Öppna GitHub-länken i sidfoten och välj Releases > v0.1.0. Hämta camera-41_exposure-v0.1.0-macos.zip och packa upp hela arkivet i en lokal mapp där du har skrivrättighet. Behåll src, tools, VERSION och övriga filer tillsammans; flytta inte bara start.m."
+          "Öppna GitHub-länken i sidfoten och välj Releases > v0.1.1. Hämta Camera-41_det-v0.1.1-macos.zip och packa upp hela arkivet i en lokal mapp där du har skrivrättighet. Behåll src, tools, VERSION och övriga filer tillsammans; flytta inte bara start.m."
         ],
         [
           "2. Starta i MATLAB",
-          "Öppna MATLAB och öppna start.m i den uppackade appmappen. Tryck Run. Alternativt: välj appmappen som Current Folder och skriv startCamera41_exposure; i Command Window. Programmets huvudfönster öppnas."
+          "Öppna MATLAB och öppna start.m i den uppackade appmappen. Tryck Run. Alternativt: välj appmappen som Current Folder och skriv startCamera41_det; i Command Window. Programmets huvudfönster öppnas."
         ],
         [
           "Krav och medföljande RAW-läsare",
@@ -44,7 +44,7 @@
         ],
         [
           "Efter installation eller uppdatering",
-          "Inga provbilder ingår. Lägg till egna RAW-filer med Add FB+F RAW files. Loggen skapas i logs/camera41_exposure.jsonl i appmappen; öppna den via Log > Open complete log. Stäng Exposure-fönstret innan programfiler byts ut och starta sedan om appen. Om macOS blockerar den hämtade läsaren, granska säkerhetsmeddelandet och loggen."
+          "Inga provbilder ingår. Lägg till egna RAW-filer med Add FB+F RAW files. Loggen skapas i logs/camera41_det.jsonl i appmappen; öppna den via Log > Open complete log. Stäng Camera-41_det-fönstret innan programfiler byts ut och starta sedan om appen. Om macOS blockerar den hämtade läsaren, granska säkerhetsmeddelandet och loggen."
         ],
         [
           "Kontrollera hämtningen",
@@ -98,29 +98,29 @@
     },
     {
       "title": "Efter provet, logg och hjälp",
-      "intro": "Exposure fungerar självständigt. Du överför ingen JSON-fil från Exposure till PRE eller NEG, och de behöver inte vara öppna för att använda appen.",
+      "intro": "Camera-41_det fungerar självständigt. Du överför ingen JSON-fil från Camera-41_det till PRE eller NEG, och de behöver inte vara öppna för att använda appen.",
       "sections": [
         [
           "Fortsätt i PRE med aktuella bilder",
-          "Ställ själv in digitalkameran på vald tid. Ta den aktuella filmens tomma FB+F-ruta samt två separata mörker-RAW med samma kamera, ISO, exponeringstid och bländare. Mörkerbilderna tas med ljuset till sensorn blockerat och under relevanta matchande förhållanden.\nLäs dessa bilder direkt i PRE:s flik 7. Där kan FB+F och mörkerparet förhandsvisas med gemensamt sensorområde och användas för brus- och S/N-mätning. PRE:s mätresultat följer filmkarakteriseringen till NEG. Exposure exporterar inte detta underlag och behöver inte vara installerat för att PRE ska användas."
+          "Ställ själv in digitalkameran på vald tid. Ta den aktuella filmens tomma FB+F-ruta samt två separata mörker-RAW med samma kamera, ISO, exponeringstid och bländare. Mörkerbilderna tas med ljuset till sensorn blockerat och under relevanta matchande förhållanden.\nLäs dessa bilder direkt i PRE:s flik 7. Där kan FB+F och mörkerparet förhandsvisas med gemensamt sensorområde och användas för brus- och S/N-mätning. PRE:s mätresultat följer filmkarakteriseringen till NEG. Camera-41_det exporterar inte detta underlag och behöver inte vara installerat för att PRE ska användas."
         ],
         [
           "När något verkar fel",
-          "Inget syns i RAW preview: markera en fil och tryck Preview selected RAW. Diagrammet finns i den andra fliken, Exposure comparison.\nIngen tid kan väljas: läs kanalrapporten. Alla bilder kan vara REVIEW eller FAIL. En enda underkänd bild räcker inte för att hitta en bra tid.\nRAW file missing: kontrollera att filen eller dess externa disk fortfarande finns tillgänglig.\nSeg filväljare eller felmeddelande: använd loggen. Den skiljer förberedelse, dialog, filregistrering och analys åt.\nEfter uppdaterad programkod: stäng Exposure-fönstret och starta appen igen."
+          "Inget syns i RAW preview: markera en fil och tryck Preview selected RAW. Diagrammet finns i den andra fliken, Exposure comparison.\nIngen tid kan väljas: läs kanalrapporten. Alla bilder kan vara REVIEW eller FAIL. En enda underkänd bild räcker inte för att hitta en bra tid.\nRAW file missing: kontrollera att filen eller dess externa disk fortfarande finns tillgänglig.\nSeg filväljare eller felmeddelande: använd loggen. Den skiljer förberedelse, dialog, filregistrering och analys åt.\nEfter uppdaterad programkod: stäng Camera-41_det-fönstret och starta appen igen."
         ],
         [
           "Logg och sparade uppgifter",
-          "Log > Open complete log öppnar logs/camera41_exposure.jsonl i appmappen. Varje post har UTC-tid, process-ID, händelse och detaljer. Filval, inställningar, mätningar, varaktigheter och fel loggas. Filväljarens tid inkluderar även tiden du själv väljer filer; den säger inte ensam när dialogen först blev synlig.\nSenaste RAW-mapp sparas i MATLAB-inställningarna. Vald bildlista och övriga fönsterinställningar återställs inte efter stängning. Original-RAW ändras inte. Loggen är lokal och ingår inte i Git."
+          "Log > Open complete log öppnar logs/camera41_det.jsonl i appmappen. Varje post har UTC-tid, process-ID, händelse och detaljer. Filval, inställningar, mätningar, varaktigheter och fel loggas. Filväljarens tid inkluderar även tiden du själv väljer filer; den säger inte ensam när dialogen först blev synlig.\nSenaste RAW-mapp sparas i MATLAB-inställningarna. Vald bildlista och övriga fönsterinställningar återställs inte efter stängning. Original-RAW ändras inte. Loggen är lokal och ingår inte i Git."
         ],
         [
           "Krav, version och licenser",
-          "Denna handbok avser Camera-41 Exposure v0.1.0, 19 oktober 2026. MATLAB och medföljande LibRaw-läsare krävs; Apple Silicon-versionen är provad på utvecklingsdatorn. Vid flytt till annan dator kan läsaren behöva byggas om med LibRaw och pkg-config.\nProgrammets egen kod och dokumentation: GPL-3.0-or-later. Full licens finns i LICENSE och information i LICENSE_NOTICE.md. Tredjepartslicenser för LibRaw, JPEG-turbo, libomp och Little CMS finns i third_party/licenses. MATLAB har egen licens."
+          "Denna handbok avser Camera-41_det v0.1.1, 19 oktober 2026. MATLAB och medföljande LibRaw-läsare krävs; Apple Silicon-versionen är provad på utvecklingsdatorn. Vid flytt till annan dator kan läsaren behöva byggas om med LibRaw och pkg-config.\nProgrammets egen kod och dokumentation: GPL-3.0-or-later. Full licens finns i LICENSE och information i LICENSE_NOTICE.md. Tredjepartslicenser för LibRaw, JPEG-turbo, libomp och Little CMS finns i third_party/licenses. MATLAB har egen licens."
         ]
       ]
     }
   ],
-  "version": "0.1.0",
+  "version": "0.1.1",
   "author": "Christer Törnkvist",
   "email": "christer@borgasundsfotografiska.se",
-  "github": "https://github.com/chto0703009/camera-41_exposure"
+  "github": "https://github.com/chto0703009/Camera-41_det"
 }

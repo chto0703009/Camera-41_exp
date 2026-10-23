@@ -2,7 +2,7 @@ function run_raw_smoke_test(rawFile)
 %RUN_RAW_SMOKE_TEST Real RAW through UI, plots and no-export workflow.
 arguments,rawFile (1,1) string,end
 root=fileparts(fileparts(mfilename('fullpath')));addpath(root,fullfile(root,'src'));
-a=startCamera41_exposure(Visible="off");cleanup=onCleanup(@() delete(a.Figure));a.SetFiles(rawFile);
+a=startCamera41_det(Visible="off");cleanup=onCleanup(@() delete(a.Figure));a.SetFiles(rawFile);
 a.Controls.AutomaticArea.Value=false;a.Controls.Light.Value='COOL - software release verification only';
 a.Controls.Note.Value='Existing FB+F fixture; no new physical qualification';a.Controls.Confirmed.Value=true;
 area=[1800 1200 5000 3200];for k=1:4,a.Controls.ROI{k}.Value=area(k);end

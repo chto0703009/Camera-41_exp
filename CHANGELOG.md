@@ -1,6 +1,10 @@
+# v0.1.1
+
+Renamed the application to Camera-41_det, including the MATLAB package, launcher, documentation and distribution files.
+
 # Changelog
 
-## v0.1.0 - 2026-10-19
+## v0.1.1 - 2026-10-19
 
 First release of the standalone MATLAB tool for choosing digital-camera exposure when scanning negative film at a fixed selected aperture.
 
@@ -10,7 +14,7 @@ First release of the standalone MATLAB tool for choosing digital-camera exposure
 - RAW previews, multi-file selection, remembered folder and focus restoration after dialogs.
 - Complete local timestamped diagnostic log with per-RAW timing and error reports.
 - Independent operation; no PRE/NEG JSON export or program dependency.
-- Swedish and English v0.1.0 handbooks with author, email and GitHub footer links.
+- Swedish and English v0.1.1 handbooks with author, email and GitHub footer links.
 - GPL-3.0-or-later notice and bundled third-party licence files.
 
 Verified on MATLAB R2025b/macOS Apple Silicon. Intel reader build information checked under Rosetta; physical Intel operation is unverified. This release does not measure dark-pair noise or create production qualification. Those measurements belong to the current-film workflow in PRE, if used.
