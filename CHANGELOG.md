@@ -1,3 +1,11 @@
+# Camera-41_exp v0.1.3
+
+- Use English throughout the app, warnings, result tables, charts and Python/LibRaw preparation dialogs.
+- Ship the unified isolated Python 3.13.6 environment setup and native architecture checks.
+- Preserve the existing exposure calculations and original RAW files.
+
+Private measurements and local virtual environments are excluded. Existing scientific acceptance is unchanged.
+
 # v0.1.2 — Camera-41_exp
 
 Renamed the application, MATLAB namespace, entry point, documentation, release package and GitHub repository from Camera-41_det to Camera-41_exp. Exposure calculations and report schemas are unchanged.

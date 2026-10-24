@@ -14,9 +14,9 @@ for a=1:2
  end
 end
 reasons=strings(0,1);
-if any(medianSignal<=1e-5),reasons(end+1)="Signalen är för låg för att bedöma en jämn FB+F-yta.";end
-if any(residual>.18),reasons(end+1)="Struktur eller ojämnheter avviker från en jämn tom FB+F-exponering.";end
-if any(rangeEV>1),reasons(end+1)="Ljusskillnaden inom det föreslagna området överstiger 1 EV.";end
+if any(medianSignal<=1e-5),reasons(end+1)="The signal is too low to assess a uniform film base + fog area.";end
+if any(residual>.18),reasons(end+1)="Structure or unevenness differs from a uniform blank film base + fog exposure.";end
+if any(rangeEV>1),reasons(end+1)="The brightness variation within the proposed area exceeds 1 EV.";end
 check=struct('ROI',roi,'NeedsManualReview',~isempty(reasons),'Reasons',{cellstr(reasons)}, ...
  'Residual95EV',residual,'Range90EV',rangeEV,'BorderFraction',.15,'Scope','Heuristic uniformity screen; cannot identify physical film content with certainty.');
 end

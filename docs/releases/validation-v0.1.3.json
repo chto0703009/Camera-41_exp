@@ -1,0 +1,14 @@
+{
+  "Version": "0.1.3",
+  "Date": "2026-10-24",
+  "Status": "PASS",
+  "Platform": "macOS Apple Silicon / MATLAB R2025b Update 7",
+  "Checks": [
+    "run_release_tests",
+    "Unified Python environment health",
+    "Four regenerated PDFs rendered and visually inspected"
+  ],
+  "IndependentPhysicalIntelTest": false,
+  "ScientificAcceptanceCreated": false,
+  "PrivateMeasurementsIncluded": false
+}

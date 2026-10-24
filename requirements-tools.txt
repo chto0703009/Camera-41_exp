@@ -1,0 +1,2 @@
+# Compatibility alias: all applications always install the full identical environment.
+-r requirements.txt

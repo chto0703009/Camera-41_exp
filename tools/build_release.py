@@ -14,7 +14,7 @@ def main():
     if git('status','--porcelain','--untracked-files=no'):
         raise SystemExit('Commit tracked changes before building a release.')
     version=(ROOT/'VERSION').read_text().strip()
-    if version!='0.1.2':raise SystemExit('Review release metadata for this version first.')
+    if version!='0.1.3':raise SystemExit('Review release metadata for this version first.')
     commit=git('rev-parse','HEAD');prefix=f'Camera-41_exp-v{version}'
     files=git('ls-files','-s').splitlines();entries=[]
     for line in files:

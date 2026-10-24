@@ -1,0 +1,33 @@
+# Unified Camera-41 / InkProf / SpectraLab runtime v1. Python 3.13.6.
+# Identical file in every active program. Update and verify the entire suite together.
+attrs==26.1.0
+charset-normalizer==3.5.2
+colour-science==0.4.6
+contourpy==1.4.0
+cycler==0.12.1
+fonttools==4.67.0
+h5py==3.16.0
+imagecodecs==2026.8.16
+imageio==2.37.4
+jsonschema==4.25.1
+jsonschema-specifications==2025.9.1
+kiwisolver==1.5.1
+matplotlib==3.10.5
+numpy==2.3.2
+opencv-python-headless==5.0.0.93
+OpenEXR==3.4.14
+packaging==26.3
+pexpect==4.9.0
+pillow==12.3.0
+pip==25.2
+ptyprocess==0.7.0
+pyparsing==3.3.3
+pypdf==6.18.1
+python-dateutil==2.9.0.post0
+referencing==0.36.2
+reportlab==5.0.1
+rpds-py==2026.9.1
+scipy==1.16.3
+six==1.17.0
+tifffile==2026.9.20
+typing-extensions==4.16.0

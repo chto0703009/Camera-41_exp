@@ -10,6 +10,8 @@ if ~isempty(existing)
  app=getappdata(existing(1),'App');if options.Visible=="on",figure(app.Figure);end;camera41exp.logEvent('startup.reused',struct('Seconds',toc(started)));return
 end
 try
+ camera41exp.runtime.ensurePython();
+ camera41exp.runtime.ensureRawProbe();
  app=camera41exp.app(Visible=options.Visible);
  camera41exp.logEvent('startup.complete',struct('Seconds',toc(started)));
 catch err

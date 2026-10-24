@@ -39,7 +39,7 @@ for k=1:n
   [automaticROI,areaCheck]=camera41exp.automaticArea(data.linearMosaic);areaChecks{k}=areaCheck;
   if k==1,options.ROI=automaticROI;end
   camera41exp.logEvent('roi.automatic',struct('File',inputs(k),'Check',areaCheck));
-  assert(~areaCheck.NeedsManualReview,'Camera41:Exposure:FBFStructure','%s: %s Förhandsvisa bilden och justera den markerade rutan.',inputs(k),join(string(areaCheck.Reasons),' '));
+  assert(~areaCheck.NeedsManualReview,'Camera41:Exposure:FBFStructure','%s: %s Preview the image and adjust the marked area.',inputs(k),join(string(areaCheck.Reasons),' '));
  end
  r=camera41exp.raw.assessValoiCapture(decoded,options.ROI,PassMarginEV=options.PassMarginEV,FailFraction=options.FailFraction);
  camera41exp.logEvent('raw.assessment.complete',struct('File',inputs(k),'Seconds',toc(assessmentTimer),'Status',r.Status,'Channels',r.Channels));
@@ -58,8 +58,8 @@ for k=1:4
 end
 writetable(summary,fullfile(out,'exposure_summary.csv'));
 f=figure('Visible','off','Color','w');cleanup=onCleanup(@() close(f));tiledlayout(2,1);
-nexttile;semilogx(times,headroom,'o-');yline(options.PassMarginEV,'--');grid on;xlabel('Tid (s)');ylabel('Marginal (EV)');legend(channels,'Location','best');title('Digitalkamera: bas + slöja');
-nexttile;semilogx(times,signals./times,'o-');grid on;xlabel('Tid (s)');ylabel('Signal / tid');legend(channels,'Location','best');title('Proportionalitet; temporalt brus ej uppmätt');
+nexttile;semilogx(times,headroom,'o-');yline(options.PassMarginEV,'--');grid on;xlabel('Time (s)');ylabel('Headroom (EV)');legend(channels,'Location','best');title('Digital camera: film base + fog');
+nexttile;semilogx(times,signals./times,'o-');grid on;xlabel('Time (s)');ylabel('Signal / time');legend(channels,'Location','best');title('Proportionality; temporal noise not measured');
 exportgraphics(f,fullfile(out,'exposure_summary.png'));
 result=struct('Schema','camera41.digitization-exposure-preparation.v1','Status','PREPARATORY_REVIEW', ...
  'LightSetup',options.LightSetup,'BaseFogNote',options.BaseFogNote,'ROI',options.ROI, ...

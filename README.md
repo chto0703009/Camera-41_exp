@@ -1,4 +1,4 @@
-# Camera-41_exp v0.1.2
+# Camera-41_exp v0.1.3
 
 [English summary and installation (PDF)](output/pdf/Camera41_exp_Summary_EN.pdf)
 
@@ -21,4 +21,8 @@ MATLAB and the bundled LibRaw probe are required. Original RAWs are unchanged. A
 
 Editable sources are in `docs/handbook/handbook_sv.json` and `handbook_en.json`. Rebuild both PDFs with `python tools/build_handbooks.py` (requires reportlab). The handbooks describe why FB+F exposure is used to avoid clipping, capture setup, automatic/manual areas, results, standalone operation and logging.
 
-[Sammanfattning på svenska (PDF)](output/pdf/Camera41_exp_Sammanfattning_SV.pdf) - fristående ensidesguide för v0.1.2.
+[Sammanfattning på svenska (PDF)](output/pdf/Camera41_exp_Sammanfattning_SV.pdf) - fristående ensidesguide för v0.1.3.
+
+## Pythonmiljö och datorbyte
+
+Programmet använder en egen `.venv` med Python 3.13.6 och samma fullständiga paketversioner som övriga aktiva Camera-41-, InkProf- och SpectraLab-program. Se [PYTHON_ENVIRONMENT.md](PYTHON_ENVIRONMENT.md) för installation, kontroll och säker ombyggnad.

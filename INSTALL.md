@@ -1,8 +1,8 @@
-# Camera-41_exp v0.1.2 - installation
+# Camera-41_exp v0.1.3 - installation
 
 This is a MATLAB application, not a standalone macOS executable. PRE and NEG are not required.
 
-1. Download and extract `Camera-41_exp-v0.1.2-macos.zip` to a local writable folder.
+1. Download and extract `Camera-41_exp-v0.1.3-macos.zip` to a local writable folder.
 2. Open MATLAB. Open `start.m` from the extracted folder and press **Run**.
 3. Alternatively, set MATLAB's current folder to the extracted folder and run `startCamera41_exp;`.
 4. Read the Swedish or English handbook under `output/pdf/`.
@@ -15,7 +15,7 @@ This is a MATLAB application, not a standalone macOS executable. PRE and NEG are
 - Apple Silicon: application startup, regression tests and a real RAW analysis are verified.
 - Intel: a reader and its native libraries are included; the reader's build information was checked under Rosetta. Physical Intel MATLAB/UI/RAW operation has not been verified.
 - Windows, Linux and older MATLAB releases have not been qualified for this release.
-- Python is not required to run the application. Python is used only by optional developer tools for rebuilding handbooks or release archives.
+- The application verifies its own isolated Python 3.13.6 environment at startup. Use setup_python_environment("check"), "sync" or "rebuild" to maintain it; see PYTHON_ENVIRONMENT.md.
 
 No Homebrew installation is required for the supplied reader on the verified computer. If macOS blocks a downloaded native executable, inspect the security prompt and the local log rather than disabling system security globally. Do not move only `start.m`: keep `src`, `tools`, `VERSION` and the other supplied files together.
 

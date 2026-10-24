@@ -111,8 +111,8 @@ setappdata(f,'App',app);areaMode();
    views.SelectedTab=previewTab;title(ax,'Display only; measurement area uses native sensor pixels');previewFile=files(selected);rectangle=[];camera41exp.logEvent('preview.complete',struct('File',previewFile,'Seconds',toc(previewTimer)));
    rectangle=drawrectangle(ax,'Position',camera41exp.clampArea(cellfun(@(c)c.Value,coords),visibleSize),'Color','y');addlistener(rectangle,'ROIMoved',@areaChanged);
    if manualRequired
-    automatic.Value=false;areaMode();status.Value=cellstr(["VARNING: bilden avviker från förväntad tom FB+F. Det föreslagna området är markerat i gult. Justera rutan till ren filmbas + slöja.";manualReason]);
-   else,status.Value={'Automatiskt mätområde är markerat i gult och undviker bildkanterna.'};end
+    automatic.Value=false;areaMode();status.Value=cellstr(["WARNING: the image differs from the expected blank film base + fog. The proposed area is marked in yellow. Adjust it to a clean film base + fog area.";manualReason]);
+   else,status.Value={'The automatic measurement area is marked in yellow and avoids the image edges.'};end
   catch err,report(err);end
  end
  function drawArea(~,~)
@@ -133,7 +133,7 @@ setappdata(f,'App',app);areaMode();
   try
    assert(~isempty(files),'Add RAW files first.');assert(confirm.Value,'Confirm that every RAW shows the same film-base sample.');
    assert(strlength(strip(string(light.Value)))>0 && strlength(strip(string(note.Value)))>0,'Describe the light and film-base sample.');
-   assert(~manualRequired || manualReady,'Justera den gula markeringen innan analysen fortsätter.');
+   assert(~manualRequired || manualReady,'Adjust the yellow measurement area before continuing the analysis.');
    roi=cellfun(@(c)c.Value,coords);assert(all(roi(3:4)>=20),'Use a measurement area at least 20 x 20 pixels.');
    begin();done=onCleanup(@finish);status.Value={'Analysing RAW exposures … Comparing signal and clipping margin.'};drawnow;
    assert(~isfolder(out)&&~isfile(out),'Choose a new temporary analysis folder.');
@@ -141,7 +141,7 @@ setappdata(f,'App',app);areaMode();
    measured=camera41exp.workflow.prepareDigitizationExposure(files,OutputRoot=out,ROI=roi,AutomaticArea=automatic.Value,LightSetup=string(light.Value),BaseFogNote=string(note.Value));
    for j=1:4,coords{j}.Value=measured.ROI(j);end
    t=readtable(fullfile(out,'exposure_summary.csv'));
-   [displayTable,reportLines]=camera41exp.explainResults(t,measured);summary.Data=displayTable;summary.ColumnName=displayTable.Properties.VariableNames;summary.ColumnWidth={150,65,65,85,110,350};
+   [displayTable,reportLines]=camera41exp.explainResults(t,measured);summary.Data=displayTable;summary.ColumnName={'RAW file','Time (s)','Status','Headroom (EV)','At/above limit (%)','Explanation'};summary.ColumnWidth={150,65,65,100,120,350};
    analysisTable=t;result=measured;
    channels=["R","G1","G2","B"];signals=zeros(height(t),4);margins=signals;
    for j=1:4,signals(:,j)=t.(char("MedianSignalCodes_"+channels(j)));margins(:,j)=t.(char("HeadroomEV_"+channels(j)));end
