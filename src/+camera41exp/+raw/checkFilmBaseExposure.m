@@ -1,7 +1,7 @@
 function assessment = checkFilmBaseExposure(decoded, roi, options)
 %CHECKFILMBASEEXPOSURE Assess clear film/base+fog exposure in sensor space.
 %
-% assessment = camera41det.raw.checkFilmBaseExposure(decoded, [x y w h])
+% assessment = camera41exp.raw.checkFilmBaseExposure(decoded, [x y w h])
 
 arguments
     decoded (1,1) struct
@@ -14,7 +14,7 @@ if ~isfield(decoded, "Schema") || ...
         string(decoded.Schema) ~= "camera41.raw-decode.v0.2" || ...
         string(decoded.Status) ~= "VALID"
     error("Camera41:FilmBase:InvalidDecode", ...
-        "Input must be a VALID result returned by camera41det.raw.decode.");
+        "Input must be a VALID result returned by camera41exp.raw.decode.");
 end
 required = ["ResultFolder", "Outputs", "LibRaw"];
 if ~all(isfield(decoded, required))
@@ -104,8 +104,8 @@ assessment.Policy = struct("Percentile", 99.9, ...
     "Status", "CONFIGURABLE_MEASURED_POLICY");
 assessment.Channels = channels;
 payload = assessment;
-assessment.ContentSHA256 = camera41det.integrity.sha256Text( ...
-    camera41det.integrity.canonicalJSON(payload));
+assessment.ContentSHA256 = camera41exp.integrity.sha256Text( ...
+    camera41exp.integrity.canonicalJSON(payload));
 
 fprintf("Camera-41 film-base exposure: %s\n", overall);
 for index = 1:4

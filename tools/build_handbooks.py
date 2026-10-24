@@ -23,10 +23,10 @@ styles={
 }
 def p(text,style):return Paragraph(escape(text).replace('\n','<br/>'),styles[style])
 def build(data):
- path=OUT/f'Camera41_det_Handbook_{data["language"]}.pdf'
+ path=OUT/f'Camera41_exp_Handbook_{data["language"]}.pdf'
  def chrome(c,doc):
   w,h=A4;c.setStrokeColor(colors.HexColor('#d6e1e5'));c.setLineWidth(.7);c.line(54,h-47,w-54,h-47)
-  c.setFont('Helvetica-Bold',9);c.setFillColor(INK);c.drawString(54,h-33,'Camera-41_det')
+  c.setFont('Helvetica-Bold',9);c.setFillColor(INK);c.drawString(54,h-33,'Camera-41_exp')
   c.setFont('Helvetica',8);c.setFillColor(GRAY);c.drawRightString(w-54,h-33,f'{data["title"]} | v{data["version"]} | {data["language"]}')
   c.line(54,66,w-54,66)
   c.setFont('Helvetica',9);c.setFillColor(BLUE)
@@ -43,7 +43,7 @@ def build(data):
   story.append(KeepInFrame(A4[0]-108,A4[1]-155,items,mode='shrink',hAlign='LEFT',vAlign='TOP'))
   if i<len(data['pages'])-1:story.append(PageBreak())
  doc=SimpleDocTemplate(str(path),pagesize=A4,rightMargin=54,leftMargin=54,topMargin=68,bottomMargin=80,
-  title='Camera-41_det - '+data['title'],author='Christer Törnkvist',subject=data['subtitle'])
+  title='Camera-41_exp - '+data['title'],author='Christer Törnkvist',subject=data['subtitle'])
  doc.build(story,onFirstPage=chrome,onLaterPages=chrome)
  print(path)
 if __name__=='__main__':

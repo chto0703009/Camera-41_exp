@@ -2,7 +2,7 @@ function file=logEvent(event,details)
 %LOGEVENT Append one timestamped JSON record; logging must not stop the app.
 arguments,event (1,1) string,details (1,1) struct=struct(),end
 root=fileparts(fileparts(fileparts(mfilename('fullpath'))));
-file=fullfile(root,'logs','camera41_det.jsonl');
+file=fullfile(root,'logs','camera41_exp.jsonl');
 try
  if ~isfolder(fileparts(file)),mkdir(fileparts(file));end
  record=struct('TimeUTC',char(datetime('now','TimeZone','UTC','Format',"yyyy-MM-dd'T'HH:mm:ss.SSSXXX")), ...

@@ -1,6 +1,10 @@
+# v0.1.2 — Camera-41_exp
+
+Renamed the application, MATLAB namespace, entry point, documentation, release package and GitHub repository from Camera-41_det to Camera-41_exp. Exposure calculations and report schemas are unchanged.
+
 # v0.1.1
 
-Renamed the application to Camera-41_det, including the MATLAB package, launcher, documentation and distribution files.
+Renamed the application to Camera-41_exp, including the MATLAB package, launcher, documentation and distribution files.
 
 # Changelog
 
