@@ -5,6 +5,14 @@ root=string(fileparts(fileparts(fileparts(fileparts(mfilename('fullpath'))))));
 try
  report=check(probe,architecture);return
 catch failure
+ % Transfers may drop the execute bit. Restore it before asking for a rebuild.
+ if isunix && isfile(probe)
+  [permissionStatus,~]=camera41exp.runtime.invoke("/bin/chmod",["u+x",probe],30);
+  if permissionStatus==0
+   try,report=check(probe,architecture);return;catch failure,end
+  end
+ end
+ fprintf('Bundled LibRaw startup failed: %s\n',failure.message);
  choice="";
  if usejava('desktop')
   choice=string(questdlg(sprintf(['LibRaw support could not start on this computer.\n\n' ...
@@ -19,7 +27,7 @@ end
 assert(isunix,'Camera41:Runtime:Platform','The bundled LibRaw build script requires macOS or Unix.');
 fprintf('Preparing LibRaw for this computer...\n');drawnow;
 [status,output]=camera41exp.runtime.invoke("/bin/sh",fullfile(root,'tools','build_raw_probe.sh'),300);
-assert(status==0,'Camera41:Runtime:Build','LibRaw preparation failed. Install LibRaw, pkg-config and a compiler, then retry.\n%s',output);
+assert(status==0,'Camera41:Runtime:Build','LibRaw preparation failed. Prefer copying the complete updated program folder, including tools/bin and tools/lib. For a local source build on macOS, install matching LibRaw, pkg-config and compiler tools (Homebrew: brew install libraw pkg-config libomp; xcode-select --install), then retry.\n%s',output);
 [probe,architecture]=camera41exp.runtime.rawProbeExecutable();report=check(probe,architecture);
 end
 function report=check(probe,architecture)

@@ -35,3 +35,11 @@ The project's code/documentation are GPL-3.0-or-later. Read `LICENSE`, `LICENSE_
 
 Christer Törnkvist - christer@borgasundsfotografiska.se
 https://github.com/chto0703009/Camera-41_exp
+
+## Preparation on another Mac
+
+Use the complete program folder, including `tools/bin/` and `tools/lib/`. Run `startCamera41_exp` and choose **Prepare** if needed. On macOS, a missing Python 3.13.6 can be downloaded into this program's private `.python/` directory before its `.venv` is built. The download uses uv 0.9.5 with pinned ARM/Intel wheel SHA-256 checksums; system Python installations and global executable links are unchanged. First preparation requires internet access to PyPI and GitHub. `setup_python_environment("identify")` and `"check"` remain read-only.
+
+The bundled native RAW reader should run without Homebrew or compiler installation. A transfer that loses its execute bit is repaired automatically. If the bundled reader cannot run, the original startup error is printed before local-build options are offered. A source rebuild requires matching LibRaw, pkg-config, libomp and Apple's command-line compiler tools. Do not copy only the start file to another computer.
+
+Download implementation: [uv Python installation](https://docs.astral.sh/uv/guides/install-python/). Managed Python uses Astral's python-build-standalone distributions; this is separate from python.org's macOS installer. uv is downloaded only for preparation, verified before execution and removed afterwards.

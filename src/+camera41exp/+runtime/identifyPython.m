@@ -1,6 +1,9 @@
 function report=identifyPython()
 %IDENTIFYPYTHON Find a base interpreter without creating/changing an environment.
+root=string(fileparts(fileparts(fileparts(fileparts(mfilename('fullpath'))))));
+managed=dir(fullfile(root,'.python','cpython-3.13.6-*','bin','python3.13'));
 candidates=strings(1,0);
+for k=1:numel(managed),candidates(end+1)=fullfile(managed(k).folder,managed(k).name);end
 if ispc
  [~,paths]=system('where python');
  candidates=reshape(splitlines(strip(string(paths))),1,[]);
@@ -42,5 +45,5 @@ for candidate=candidates
  end
 end
 if string(report.Status)=="FOUND",fprintf('Selected: %s\n',report.Executable);
-else,fprintf('No compatible base interpreter found. Install Python 3.13.6 or supply BootstrapPython explicitly.\n');end
+else,fprintf('No compatible base interpreter found. Prepare/rebuild can download private Python 3.13.6 on macOS; identify makes no changes.\n');end
 end

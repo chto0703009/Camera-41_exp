@@ -30,3 +30,8 @@ First release of the standalone MATLAB tool for choosing digital-camera exposure
 - GPL-3.0-or-later notice and bundled third-party licence files.
 
 Verified on MATLAB R2025b/macOS Apple Silicon. Intel reader build information checked under Rosetta; physical Intel operation is unverified. This release does not measure dark-pair noise or create production qualification. Those measurements belong to the current-film workflow in PRE, if used.
+
+## Unreleased - portable startup
+
+- Prepare/sync/rebuild can obtain private CPython 3.13.6 on macOS without requiring an existing exact-version installation. The preparation tool is pinned and checksum verified; native ARM is preferred on Apple Silicon. Identify/check remain read-only.
+- Restore the bundled RAW reader's execute bit after transfers before offering a source rebuild; report the original startup failure and explain the complete-folder requirement.

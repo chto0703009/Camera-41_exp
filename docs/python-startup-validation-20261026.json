@@ -1,0 +1,15 @@
+{
+  "Date": "2026-10-26",
+  "Program": "EXP",
+  "RuntimeVersion": "3.13.6",
+  "ValidatedArchitecture": "arm64",
+  "Checks": [
+    "Checksum-verified private ARM Python download from MATLAB",
+    "New isolated venv and pinned-package health check",
+    "Bundled LibRaw startup",
+    "EXP release regression tests"
+  ],
+  "PhysicalIntelTested": false,
+  "SystemPythonModified": false,
+  "OriginalProjectsModified": false
+}

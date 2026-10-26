@@ -2,7 +2,7 @@
 
 Varje aktiv programinstallation har en egen `.venv`, med Python **3.13.6** och exakt samma fullständiga paketlista i `requirements.txt`. Miljöerna delar inga paketmappar och kan flyttas eller byggas om oberoende av varandra. Även EXP har miljön för enhetlig installation, trots att dess vanliga RAW-avkodning använder LibRaw direkt.
 
-Kör programmets vanliga startkommando. En saknad eller ogiltig miljö ger dialogen **Förbered för den här datorn**. Ett datorbyte kan kräva ombyggnad; Python 3.13.6 måste vara installerat och första installationen kan behöva internet. Inga externa Pythonmiljöer väljs automatiskt som programruntime.
+Kör programmets vanliga startkommando. En saknad eller ogiltig miljö ger dialogen **Förbered för den här datorn**. Ett datorbyte kan kräva ombyggnad; Om Python 3.13.6 saknas kan Prepare, sync eller rebuild på macOS hämta en privat interpreter till `.python/` via kontrollsummeverifierad uv 0.9.5. ARM väljs på Apple Silicon och Intel på Intel. Inga systeminstallationer, PATH eller globala Python-länkar ändras; internet till PyPI och GitHub behövs vid första hämtningen. `identify` och `check` hämtar eller installerar ingenting. `.python/` och `.venv/` byggs om på destinationsdatorn och ska inte versionshanteras. Inga externa Pythonmiljöer väljs automatiskt som programruntime.
 
 Gemensamma underhållskommandon från programmets kodmapp:
 

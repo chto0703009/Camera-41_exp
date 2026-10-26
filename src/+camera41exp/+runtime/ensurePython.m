@@ -13,7 +13,7 @@ if options.Mode=="ensure"
   return
  catch failure
   message=sprintf(['The Python environment needs to be prepared for this computer.\n\n' ...
-   'A moved, missing or incompatible environment can be rebuilt. Internet access may be required. ' ...
+   'A moved, missing or incompatible environment can be rebuilt. Missing Python 3.13.6 is downloaded privately on macOS; system Python is unchanged. Internet access may be required. ' ...
    'The existing environment is backed up and restored if installation fails.\n\nReason: %s'],failure.message);
   choice="";
   if usejava('desktop')
@@ -38,11 +38,14 @@ if bootstrap=="" || mode=="identify"
  if mode=="identify",report=discovery;return;end
  bootstrap=string(discovery.Executable);
 end
+if bootstrap=="" && any(mode==["rebuild","sync"])
+ bootstrap=camera41exp.runtime.preparePython(root,options.TimeoutSeconds);
+end
 assert(bootstrap~="",'Camera41:Python:Bootstrap', ...
- 'No compatible Python found. Install Python 3.13.6, then run setup_python_environment("identify"). You can also supply BootstrapPython explicitly.');
+ 'Python 3.13.6 is not ready. Run setup_python_environment("rebuild") to prepare a private interpreter, or supply BootstrapPython explicitly.');
 fprintf('Camera-41 Python interpreter: %s\n',bootstrap);
 file=string(tempname)+".json";cleanup=onCleanup(@() remove(file));
-if ~isfile(python),fprintf('Creating the isolated Camera-41 Python environment and installing dependencies. The first installation requires internet access.\n');end
+if mode~="check" && ~isfile(python),fprintf('Creating the isolated Camera-41 Python environment and installing dependencies. The first installation requires internet access.\n');end
 args=["-I",fullfile(root,'tools','manage_python_environment.py'),mode,"--root",root,"--profile",profile,"--output",file];
 [status,output]=camera41exp.runtime.invoke(bootstrap,args,options.TimeoutSeconds);
 assert(status==0 && isfile(file),'Camera41:Python:Environment', ...

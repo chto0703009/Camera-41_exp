@@ -39,3 +39,6 @@ dist/
 **/.venv.backup_*/
 **/.venv.failed_*/
 local-config/
+
+# Private managed base interpreter (recreated on each computer)
+.python/
