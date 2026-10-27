@@ -5,10 +5,7 @@ arguments
  args (1,:) string
  timeout (1,1) double=300
 end
-native=camera41exp.runtime.nativeArchitecture(executable);
-if native.Native && native.Physical=="arm64"
- args=["-arm64",executable,args];executable="/usr/bin/arch";
-end
+[executable,args]=camera41exp.runtime.nativeCommand(executable,args);
 log=string(tempname)+".log";cleanup=onCleanup(@() remove(log));
 list=javaObject('java.util.ArrayList');list.add(javaObject('java.lang.String',char(executable)));
 for value=args,list.add(javaObject('java.lang.String',char(value)));end

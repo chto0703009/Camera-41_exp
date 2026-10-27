@@ -1,0 +1,35 @@
+{
+  "Program": "Camera-41_exp",
+  "Version": "0.1.4",
+  "Date": "2026-10-27",
+  "MATLAB": "R2025b Update 7",
+  "Status": "PASS",
+  "Tests": [
+    "Physical ARM LibRaw 0.22.1 startup",
+    "ARM and Intel Mach-O selection",
+    "Matching fallback accepted; wrong fallback and misleading suffix rejected",
+    "Native Perl and literal Unicode process arguments",
+    "EXP exposure, reports, automatic areas and dialog cleanup release regressions"
+  ],
+  "PhysicalIntelVerified": false,
+  "OriginalProjectsModified": false,
+  "OriginalMeasurementsModified": false,
+  "Documentation": [
+    {
+      "Path": "output/pdf/Camera41_exp_Handbook_EN.pdf",
+      "SHA256": "6110e6da0ab92fa98cbb8ace9bc3cd8602c85d5caf1aba9c09bcbb028e59dc72"
+    },
+    {
+      "Path": "output/pdf/Camera41_exp_Handbook_SV.pdf",
+      "SHA256": "02261e2ffe8adb1493e60949c6cb8dbe624d8f2fc887bf3feb272ff5aae12f11"
+    },
+    {
+      "Path": "output/pdf/Camera41_exp_Sammanfattning_SV.pdf",
+      "SHA256": "a2eff8521fde03410e965bf2d6a06380dbeaef845ac4b29464d25e0658d7a65d"
+    },
+    {
+      "Path": "output/pdf/Camera41_exp_Summary_EN.pdf",
+      "SHA256": "e5a211aab0fd29c2904dfca0dd19ac8789fcc1a75da497d2ec81c1d34c960ce4"
+    }
+  ]
+}

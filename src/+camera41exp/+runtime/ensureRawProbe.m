@@ -1,8 +1,9 @@
 function report=ensureRawProbe()
 %ENSURERAWPROBE Verify native support and offer a local rebuild if needed.
 root=string(fileparts(fileparts(fileparts(fileparts(mfilename('fullpath'))))));
-[probe,architecture]=camera41exp.runtime.rawProbeExecutable();
+probe="";architecture="";
 try
+ [probe,architecture]=camera41exp.runtime.rawProbeExecutable();
  report=check(probe,architecture);return
 catch failure
  % Transfers may drop the execute bit. Restore it before asking for a rebuild.

@@ -1,3 +1,13 @@
+# Camera-41_exp v0.1.4 - 2026-10-27
+
+- Choose LibRaw for the physical ARM/Intel Mac CPU, including when MATLAB runs under Rosetta.
+- Inspect actual Mach-O slices before accepting named readers or unsuffixed fallbacks; reject a foreign-only fallback.
+- Execute RAW decoding without shell interpolation; require matching dependencies during local rebuilds.
+- Include private Python preparation and transfer-permission repair from the portable-startup work.
+- Update Swedish and English handbooks, summaries and installation instructions to v0.1.4.
+
+Validation: ARM LibRaw 0.22.1 startup, both architecture-selection cases, fallback rejection and full EXP release regressions. Physical Intel execution is not newly qualified. Original RAW files and exposure calculations are preserved. EXP has no ExifTool dependency.
+
 # Camera-41_exp v0.1.3
 
 - Use English throughout the app, warnings, result tables, charts and Python/LibRaw preparation dialogs.
@@ -31,7 +41,7 @@ First release of the standalone MATLAB tool for choosing digital-camera exposure
 
 Verified on MATLAB R2025b/macOS Apple Silicon. Intel reader build information checked under Rosetta; physical Intel operation is unverified. This release does not measure dark-pair noise or create production qualification. Those measurements belong to the current-film workflow in PRE, if used.
 
-## Unreleased - portable startup
+## Portable startup included in v0.1.4
 
 - Prepare/sync/rebuild can obtain private CPython 3.13.6 on macOS without requiring an existing exact-version installation. The preparation tool is pinned and checksum verified; native ARM is preferred on Apple Silicon. Identify/check remain read-only.
 - Restore the bundled RAW reader's execute bit after transfers before offering a source rebuild; report the original startup failure and explain the complete-folder requirement.

@@ -14,6 +14,8 @@ if executable=="" || ~isfile(executable),return;end
 if status==0
  info.Slices=reshape(split(strip(value)),1,[]);
  info.Native=any(info.Slices==physical);
+ if physical=="arm64",info.Native=any(startsWith(info.Slices,"arm64"));end
+ if physical=="x86_64",info.Native=any(startsWith(info.Slices,"x86_64"));end
 end
 end
 function [status,output]=probe(executable,args)

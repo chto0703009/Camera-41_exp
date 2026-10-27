@@ -1,8 +1,8 @@
-# Camera-41_exp v0.1.3 - installation
+# Camera-41_exp v0.1.4 - installation
 
 This is a MATLAB application, not a standalone macOS executable. PRE and NEG are not required.
 
-1. Download and extract `Camera-41_exp-v0.1.3-macos.zip` to a local writable folder.
+1. Download and extract `Camera-41_exp-v0.1.4-macos.zip` to a local writable folder.
 2. Open MATLAB. Open `start.m` from the extracted folder and press **Run**.
 3. Alternatively, set MATLAB's current folder to the extracted folder and run `startCamera41_exp;`.
 4. Read the Swedish or English handbook under `output/pdf/`.

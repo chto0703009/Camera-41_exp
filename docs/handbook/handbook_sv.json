@@ -2,7 +2,7 @@
   "language": "SV",
   "title": "Handbok",
   "subtitle": "Digitalkamerans exponering vid filminläsning",
-  "date": "24 oktober 2026",
+  "date": "27 oktober 2026",
   "pages": [
     {
       "title": "Varför använda Camera-41_exp?",
@@ -28,11 +28,11 @@
     },
     {
       "title": "Installation och start",
-      "intro": "Camera-41_exp v0.1.3 körs i MATLAB. Appen kontrollerar sin egen isolerade Pythonmiljö med Python 3.13.6 vid start. Se PYTHON_ENVIRONMENT.md för installation och reparation. PRE och NEG behöver inte vara installerade.",
+      "intro": "Camera-41_exp v0.1.4 körs i MATLAB. Appen kontrollerar sin egen isolerade Pythonmiljö med Python 3.13.6 vid start. Se PYTHON_ENVIRONMENT.md för installation och reparation. PRE och NEG behöver inte vara installerade.",
       "sections": [
         [
           "1. Hämta och packa upp",
-          "Öppna GitHub-länken i sidfoten och välj Releases > v0.1.3. Hämta Camera-41_exp-v0.1.3-macos.zip och packa upp hela arkivet i en lokal mapp där du har skrivrättighet. Behåll src, tools, VERSION och övriga filer tillsammans; flytta inte bara start.m."
+          "Öppna GitHub-länken i sidfoten och välj Releases > v0.1.4. Hämta Camera-41_exp-v0.1.4-macos.zip och packa upp hela arkivet i en lokal mapp där du har skrivrättighet. Behåll src, tools, VERSION och övriga filer tillsammans; flytta inte bara start.m."
         ],
         [
           "2. Starta i MATLAB",
@@ -49,6 +49,10 @@
         [
           "Kontrollera hämtningen",
           "Release-sidan innehåller SHA256SUMS.txt. På macOS kan du jämföra en fil med kommandot shasum -a 256 följt av filnamnet. ZIP-paketets RELEASE_MANIFEST.json anger källkodens commit och kontrollsummor för filerna. Fullständiga installationsuppgifter finns även i INSTALL.md."
+        ],
+        [
+          "Nativ RAW-läsare",
+          "LibRaw-läsaren kontrolleras mot den fysiska ARM-/Intel-processorn, även när reservbinären utan ändelse används. En binär för fel arkitektur avvisas. Lokal ombyggnad kräver matchande nativa LibRaw- och libomp-bibliotek. Körning på fysisk Intel-Mac är ännu inte verifierad."
         ]
       ]
     },
@@ -114,12 +118,12 @@
         ],
         [
           "Krav, version och licenser",
-          "Denna handbok avser Camera-41_exp v0.1.3, 24 oktober 2026. MATLAB och medföljande LibRaw-läsare krävs; Apple Silicon-versionen är provad på utvecklingsdatorn. Vid flytt till annan dator kan läsaren behöva byggas om med LibRaw och pkg-config.\nProgrammets egen kod och dokumentation: GPL-3.0-or-later. Full licens finns i LICENSE och information i LICENSE_NOTICE.md. Tredjepartslicenser för LibRaw, JPEG-turbo, libomp och Little CMS finns i third_party/licenses. MATLAB har egen licens."
+          "Denna handbok avser Camera-41_exp v0.1.4, 27 oktober 2026. MATLAB och medföljande LibRaw-läsare krävs; Apple Silicon-versionen är provad på utvecklingsdatorn. Vid flytt till annan dator kan läsaren behöva byggas om med LibRaw och pkg-config.\nProgrammets egen kod och dokumentation: GPL-3.0-or-later. Full licens finns i LICENSE och information i LICENSE_NOTICE.md. Tredjepartslicenser för LibRaw, JPEG-turbo, libomp och Little CMS finns i third_party/licenses. MATLAB har egen licens."
         ]
       ]
     }
   ],
-  "version": "0.1.3",
+  "version": "0.1.4",
   "author": "Christer Törnkvist",
   "email": "christer@borgasundsfotografiska.se",
   "github": "https://github.com/chto0703009/Camera-41_exp"

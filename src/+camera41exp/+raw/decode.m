@@ -38,9 +38,7 @@ resultCleanup = onCleanup(@() cleanupFailedResult(resultFolder));
 metadataFile = fullfile(resultFolder, "libraw_metadata.json");
 mosaicFile = fullfile(resultFolder, "bayer_mosaic.raw16le");
 
-command = shellQuote(probe) + " " + shellQuote(rawFile) + " " + ...
-    shellQuote(metadataFile) + " " + shellQuote(mosaicFile);
-[status, output] = system(command);
+[status, output] = camera41exp.runtime.invoke(probe,[string(rawFile),string(metadataFile),string(mosaicFile)],300);
 if status ~= 0
     error("Camera41:Raw:LibRawFailed", ...
         "LibRaw probe failed (%d):\n%s", status, output);
@@ -270,15 +268,6 @@ end
 
 function value = canonicalPath(path)
 value = string(char(java.io.File(char(path)).getCanonicalPath()));
-end
-
-function value = shellQuote(value)
-value = string(value);
-if contains(value, """")
-    error("Camera41:Raw:UnsupportedPath", ...
-        "RAW decoding paths must not contain a double-quote character.");
-end
-value = """" + value + """";
 end
 
 function cleanupFailedResult(folder)

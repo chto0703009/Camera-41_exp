@@ -13,12 +13,6 @@ fi
 case "$target_arch" in arm64|x86_64) ;; *) echo "Unsupported RAW-reader architecture: $target_arch" >&2; exit 1;; esac
 
 write_manifest() {
-  # Standalone NEG builds carry their Homebrew dependencies locally as well.
-  if [ -f "$script_dir/../config/standalone_negative.json" ] && [ "$(uname)" = "Darwin" ]; then
-    bundle_python="$script_dir/../.venv/bin/python"
-    if [ ! -x "$bundle_python" ]; then bundle_python=python3; fi
-    "$bundle_python" "$script_dir/bundle_native_libraries.py"
-  fi
   expected_args="--expected-architecture $target_arch"
   if [ "${CAMERA41_RELEASE_BUILD:-0}" = "1" ]; then
     expected_args="--expected-architecture $target_arch --expected-libraw 0.22.1-Release"
@@ -44,20 +38,19 @@ if [ -n "${CAMERA41_LIBRAW_SOURCE:-}" ] && \
 fi
 
 pkg_config=""
-for candidate in /opt/homebrew/bin/pkg-config /usr/local/bin/pkg-config; do
-  if [ -x "$candidate" ] && "$candidate" --exists libraw; then
-    pkg_config="$candidate"
-    break
+preferred_prefix=/usr/local
+if [ "$target_arch" = arm64 ]; then preferred_prefix=/opt/homebrew; fi
+for candidate in "$preferred_prefix/bin/pkg-config" /opt/homebrew/bin/pkg-config /usr/local/bin/pkg-config "$(command -v pkg-config || true)"; do
+  if [ -n "$candidate" ] && [ -x "$candidate" ] && "$candidate" --exists libraw; then
+    candidate_libraw=$("$candidate" --variable=libdir libraw)/libraw.dylib
+    if /usr/bin/lipo -verify_arch "$target_arch" "$candidate_libraw" >/dev/null 2>&1; then
+      pkg_config="$candidate"
+      break
+    fi
   fi
 done
-if [ -z "$pkg_config" ] && command -v pkg-config >/dev/null 2>&1; then
-  candidate=$(command -v pkg-config)
-  if "$candidate" --exists libraw; then
-    pkg_config="$candidate"
-  fi
-fi
 if [ -z "$pkg_config" ]; then
-  echo "ERROR: pkg-config with a discoverable LibRaw installation was not found." >&2
+  echo "ERROR: pkg-config with a matching ${target_arch} LibRaw installation was not found." >&2
   echo "Checked /opt/homebrew/bin, /usr/local/bin and the current PATH." >&2
   exit 1
 fi
