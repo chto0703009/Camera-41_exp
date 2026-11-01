@@ -18,6 +18,7 @@ MATLAB and the bundled LibRaw probe are required. Original RAWs are unchanged. A
 
 - [English handbook (PDF)](output/pdf/Camera41_exp_Handbook_EN.pdf)
 - [Svensk handbok (PDF)](output/pdf/Camera41_exp_Handbook_SV.pdf)
+- [Arbetsinstruktion för digitaliseringsexponering (PDF, svenska)](output/pdf/Camera41_EXP_Digitaliseringsexponering_SV.pdf) — FB+F-serie, exponeringsval och överlämning till Camera-41_pre.
 
 Editable sources are in `docs/handbook/handbook_sv.json` and `handbook_en.json`. Rebuild both PDFs with `python tools/build_handbooks.py` (requires reportlab). The handbooks describe why FB+F exposure is used to avoid clipping, capture setup, automatic/manual areas, results, standalone operation and logging.
 
