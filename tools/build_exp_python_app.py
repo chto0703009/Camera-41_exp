@@ -56,6 +56,7 @@ def main():
                 files.append((info.locate_file(file), f"Notices/{package}"))
     args = [
         "--noconfirm", "--windowed", "--name", "Camera-41_exp",
+        "--icon", str(ROOT / "resources/Camera41Exp.icns"),
         "--target-architecture", cpu, "--osx-bundle-identifier", "se.camera41.exp",
         "--paths", str(ROOT), "--workpath", str(output / "build"),
         "--distpath", str(output / "dist"), "--specpath", str(output),
