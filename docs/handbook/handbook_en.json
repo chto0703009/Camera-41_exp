@@ -2,11 +2,11 @@
   "language": "EN",
   "title": "User handbook",
   "subtitle": "Digital-camera exposure for film scanning",
-  "date": "27 October 2026",
+  "date": "13 November 2026",
   "pages": [
     {
       "title": "Why use Camera-41_exp?",
-      "intro": "Camera-41_exp is a standalone tool for choosing the digital-camera shutter time when photographing negatives, at a fixed selected aperture.",
+      "intro": "Camera-41_exp helps set the digital camera exposure when digitising C-41 colour and black-and-white (B&W) film negatives with a VALOI setup. At a fixed aperture, it compares RAW captures of clear film base plus fog to find a shutter speed that gives a strong signal with room before clipping. Too much exposure can clip a sensor channel. Too little leaves a weak signal, making noise more visible when the scan is brightened.",
       "sections": [
         [
           "Avoid clipping in the RAW capture",
@@ -22,37 +22,37 @@
         ],
         [
           "Quick start",
-          "1. Open start.m in MATLAB and press Run, or run startCamera41_exp; from the app folder.\n2. Add RAW files of the same empty FB+F sample at different shutter times.\n3. Describe the light and sample; confirm that all files show the same sample.\n4. Press Analyse RAW images. Review the report and Exposure comparison.\n5. Select a measured passing time, set the camera yourself and confirm with a fresh capture."
+          "1. Open Camera-41_exp from Applications.\n2. Use Add FB+F RAWs… to load an exposure bracket of the same empty film sample.\n3. Enter Light setup and Film base + fog. Tick Same FB+F sample in all RAWs.\n4. Press Analyse RAW images and read Results and Exposure comparison.\n5. Verify the selected time with a fresh capture."
         ]
       ]
     },
     {
       "title": "Installation and startup",
-      "intro": "Camera-41_exp v0.1.4 runs in MATLAB. The app checks its own isolated Python 3.13.6 environment at startup. See PYTHON_ENVIRONMENT.md for setup and repair. PRE and NEG do not need to be installed.",
+      "intro": "The standalone macOS app includes Python and LibRaw. The interface is in English.",
       "sections": [
         [
-          "1. Download and extract",
-          "Follow the GitHub link in the footer and select Releases > v0.1.4. Download Camera-41_exp-v0.1.4-macos.zip and extract the entire archive into a local writable folder. Keep src, tools, VERSION and the other supplied files together; do not move only start.m."
+          "1. Open the disk image",
+          "Open Camera-41_exp-1.0.0-python-macos.dmg. Drag the Apple Silicon app to Applications on an M-series Mac, or choose the Intel app for an Intel Mac."
         ],
         [
-          "2. Start in MATLAB",
-          "Open MATLAB, open start.m from the extracted app folder and press Run. Alternatively, set that folder as MATLAB's Current Folder and enter startCamera41_exp; in the Command Window. The main application window opens."
+          "2. Open the app",
+          "Eject the disk image and open the app from Applications. The apps are ad hoc signed. The disk image has no Apple notarisation."
         ],
         [
-          "Requirements and supplied RAW reader",
-          "Verified environment: macOS on Apple Silicon with MATLAB R2025b. Image Processing Toolbox is needed for manual region editing with drawrectangle. MATLAB requires its own licence. The supplied LibRaw reader is selected for the Mac architecture. No Homebrew installation is needed in the verified environment. An Intel reader and libraries are included, but MATLAB operation on a physical Intel Mac has not been verified. Windows, Linux and older MATLAB releases are not qualified for this release."
+          "Verification",
+          "The full four-file Gold 200 workflow was exercised on Apple Silicon. Earlier Intel builds were exercised through Rosetta. Physical Intel testing remains outstanding."
         ],
         [
-          "After installation or an update",
-          "No sample photographs are included. Add your own files with Add FB+F RAW files. The log is created at logs/camera41_exp.jsonl inside the app folder; use Log > Open complete log. Close the Camera-41_exp window before replacing program files, then restart the app. If macOS blocks the downloaded reader, inspect the security message and local log."
+          "RAW files and diagnostics",
+          "Add your own film-base RAWs with Add FB+F RAWs…. Open log shows the local diagnostic log. Quit the app before replacing it."
         ],
         [
           "Check the download",
-          "The release page includes SHA256SUMS.txt. On macOS, compare a file using shasum -a 256 followed by its filename. RELEASE_MANIFEST.json inside the ZIP records the source commit and per-file checksums. INSTALL.md also contains the full installation instructions."
+          "Compare the installer checksum with the accompanying SHA-256 file. On macOS use shasum -a 256 followed by the installer filename. See INSTALL.md for source setup."
         ],
         [
           "Native RAW reader",
-          "The LibRaw reader is validated against the physical ARM/Intel CPU, including its unsuffixed fallback. A wrong-architecture binary is rejected. Local rebuilding requires matching native LibRaw and libomp libraries. Physical Intel operation remains unverified."
+          "The standalone app carries the LibRaw reader for its CPU architecture. It reads undemosaiced RAW sensor values. The exposure assessment expects an RGGB mosaic."
         ]
       ]
     },
@@ -62,11 +62,11 @@
       "sections": [
         [
           "Keep the setup fixed",
-          "Use the same camera, ISO, aperture, light mode and geometry throughout the bracket. Choose the aperture first and change only shutter time. Start a separate comparison if the light, film sample or setup changes. Light source / mode / setup and Physical film base + fog identification document what was measured."
+          "Use the same camera, ISO, aperture, light mode and geometry throughout the bracket. Choose the aperture first and change only shutter time. Start a separate comparison if the light, film sample or setup changes. Light setup and Film base + fog document what was measured."
         ],
         [
           "Add and preview RAW files",
-          "Add FB+F RAW files accepts one or more files. Later selections are added to the list; the same path is not duplicated. The file chooser remembers the latest RAW folder across app restarts. Remove selected removes a row from the bracket, not the original file.\nSelect a row and press Preview selected RAW to inspect it. RAW preview is a display image with brightness adjustment; screen brightness does not determine whether the measurement passes."
+          "Add FB+F RAWs… accepts one or more files. Later selections are added to the list; the same path is not duplicated. The file chooser remembers the latest RAW folder across app restarts. Remove selected removes a row from the bracket, not the original file.\nSelect a row and press Preview selected to inspect it. RAW preview is a display image with brightness adjustment; screen brightness does not determine whether the measurement passes."
         ],
         [
           "Automatic area",
@@ -74,7 +74,7 @@
         ],
         [
           "When a warning requires adjustment",
-          "If a substantial deviation is detected, the affected image is shown with the proposed area marked in yellow. Read the warning, then move or resize the rectangle onto clean empty film. Adjust marked area enables manual adjustment. X, Y, Width and Height refer to native visible sensor pixels. The rectangle is constrained to the image bounds.\nDo not exclude a genuinely clipped bright part of the FB+F sample merely to obtain PASS. If the correct empty sample cannot be identified, capture a new test frame."
+          "When a warning appears, the app shows the affected image and outlines the proposed area in yellow. Drag a new rectangle over clean empty film or edit X, Y, Width and Height in native visible sensor pixels. Use the same area across the bracket."
         ]
       ]
     },
@@ -88,15 +88,15 @@
         ],
         [
           "Plots and table",
-          "Exposure comparison plots RAW signal codes and headroom in EV against shutter time, separately for R, G1, G2 and B. A single image gives only one point per channel; add other times for a comparison.\nThe table shows file, time, status, minimum headroom and the largest channel fraction at/above the limit. The text report provides per-channel measurements and explanations. Positive margin means headroom below the limit; negative margin means the percentile value exceeds it."
+          "Exposure comparison uses 1/3 EV shutter steps and camera-style times such as 1/20, 1/15 and 1/10. The upper chart shows median RAW signal above black in sensor codes. The lower chart shows headroom before the RAW linearity limit in EV. At 0 EV the measured percentile reaches the limit. The dashed 1/3 EV line marks the minimum headroom for PASS. Results lists the file, time, status, signal, headroom and fraction at or above the limit for each channel."
         ],
         [
           "A candidate may need more evidence",
-          "No passing exposure: try shorter times if the correct FB+F area clips.\nLongest passing time without a higher non-passing capture: extend the bracket upward to bound the choice.\nToo wide a gap to the next higher non-passing time: test an intermediate time.\nThe internal proportionality check needs at least three distinct passing times spanning at least one stop (2× time). Less evidence means an insufficient check, not automatic proof of a faulty camera."
+          "The proportionality check compares signal per second to its median for each Bayer channel, using at least three distinct passing times spanning one stop or more. A deviation above 5% in any channel triggers a review before using the candidate. In the Gold 200 test, 1/20, 1/15 and 1/10 s passed the clipping criteria. At 1/8 s the green channels triggered REVIEW. The candidate was 1/10 s with a proportionality warning (maximum deviation 5.23%)."
         ],
         [
           "Choose a time with margin",
-          "The list at the bottom contains measured passing times. The app's candidate is preselected. Confirm the chosen time with a fresh FB+F capture before a longer scanning session. Do not lengthen exposure simply because the preview looks better. Revisit the test if camera settings, lighting or film base change."
+          "Choose a measured time lists the times for which all replicates passed the clipping criteria. Review any proportionality warning before using the candidate. Verify your chosen time with a fresh FB+F capture."
         ]
       ]
     },
@@ -110,20 +110,20 @@
         ],
         [
           "If something looks wrong",
-          "Nothing in RAW preview: select a file and press Preview selected RAW. Plots are in the other tab, Exposure comparison.\nNo selectable time: read the channel report. Every file may be REVIEW or FAIL. One failed capture cannot establish a useful time.\nRAW file missing: check that the file or external drive is still available.\nSlow chooser or an error: inspect the log. Preparation, dialog, file registration and analysis are recorded separately.\nAfter a code update: close the Camera-41_exp window and start the app again."
+          "Select a file and press Preview selected. For a failed analysis, read the status message and inspect the local log. Check that the RAW file and its drive are still available."
         ],
         [
           "Log and retained information",
-          "Log > Open complete log opens logs/camera41_exp.jsonl in the app folder. Each record contains UTC time, process ID, event and details. File selections, settings, measurements, durations and errors are logged. Native chooser duration includes the time you spend selecting files; it does not by itself identify when the dialog first became visible.\nThe latest RAW folder is stored in MATLAB preferences. The file list and other window settings are not restored after closing. Original RAWs remain unchanged. The log is local and excluded from Git."
+          "Open log opens the local diagnostic log. The standalone app writes ~/Library/Logs/Camera-41_exp/camera41_exp.jsonl. Source runs write logs/camera41_exp.jsonl. The app remembers the last RAW folder. It opens with an empty bracket after restart."
         ],
         [
           "Requirements, edition and licences",
-          "This handbook covers Camera-41_exp v0.1.4, 27 October 2026. MATLAB and the supplied LibRaw reader are required; the Apple Silicon reader has been tested on the development computer. On another computer the reader may need rebuilding with LibRaw and pkg-config.\nThe project's own code and documentation use GPL-3.0-or-later. See LICENSE and LICENSE_NOTICE.md. Third-party notices for LibRaw, JPEG-turbo, libomp and Little CMS are in third_party/licenses. MATLAB requires its own licence."
+          "This handbook covers the Python app in v1.0.0. Camera-41_exp uses GPL-3.0-or-later. See LICENSE, LICENSE_NOTICE.md and the bundled third-party notices."
         ]
       ]
     }
   ],
-  "version": "0.1.4",
+  "version": "1.0.0",
   "author": "Christer Törnkvist",
   "email": "christer@borgasundsfotografiska.se",
   "github": "https://github.com/chto0703009/Camera-41_exp"

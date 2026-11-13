@@ -2,11 +2,11 @@
   "language": "SV",
   "title": "Handbok",
   "subtitle": "Digitalkamerans exponering vid filminläsning",
-  "date": "27 oktober 2026",
+  "date": "13 november 2026",
   "pages": [
     {
       "title": "Varför använda Camera-41_exp?",
-      "intro": "Camera-41_exp är ett fristående hjälpmedel för att välja digitalkamerans exponeringstid vid avfotografering av negativ, vid en fast vald bländare.",
+      "intro": "Camera-41_exp hjälper dig att ställa in exponeringen när du fotograferar C-41-färgnegativ och svartvita negativ med en digitalkamera i en VALOI-uppställning. Med fast bländare jämför appen RAW-bilder av tom filmbas plus slöja för att hitta en slutartid som ger stark signal med marginal till klippning. För lång exponering kan klippa en sensorkanal. För kort exponering ger svag signal och gör bruset tydligare när bilden ljusas upp.",
       "sections": [
         [
           "Undvik klippning i RAW-bilden",
@@ -22,37 +22,37 @@
         ],
         [
           "Snabbstart",
-          "1. Öppna start.m i MATLAB och tryck Run, eller kör startCamera41_exp; från appmappen.\n2. Läs in en RAW-serie av samma tomma FB+F-prov med olika exponeringstider.\n3. Beskriv ljus och prov; bekräfta att samma prov visas i alla bilder.\n4. Tryck Analyse RAW images. Granska resultat och Exposure comparison.\n5. Välj en godkänd tid, ställ in kameran och kontrollera med en ny bild."
+          "1. Öppna Camera-41_exp från Program.\n2. Använd Add FB+F RAWs… för att läsa in en serie av samma tomma filmprov.\n3. Fyll i Light setup och Film base + fog. Markera Same FB+F sample in all RAWs.\n4. Tryck Analyse RAW images och granska Results och Exposure comparison.\n5. Kontrollera den valda tiden med en ny bild."
         ]
       ]
     },
     {
       "title": "Installation och start",
-      "intro": "Camera-41_exp v0.1.4 körs i MATLAB. Appen kontrollerar sin egen isolerade Pythonmiljö med Python 3.13.6 vid start. Se PYTHON_ENVIRONMENT.md för installation och reparation. PRE och NEG behöver inte vara installerade.",
+      "intro": "Den fristående macOS-appen innehåller Python och LibRaw. Gränssnittet är på engelska.",
       "sections": [
         [
-          "1. Hämta och packa upp",
-          "Öppna GitHub-länken i sidfoten och välj Releases > v0.1.4. Hämta Camera-41_exp-v0.1.4-macos.zip och packa upp hela arkivet i en lokal mapp där du har skrivrättighet. Behåll src, tools, VERSION och övriga filer tillsammans; flytta inte bara start.m."
+          "1. Öppna skivavbilden",
+          "Öppna Camera-41_exp-1.0.0-python-macos.dmg. Dra Apple Silicon-appen till Program på en Mac med M-chip. Välj Intel-appen för en Intel-Mac."
         ],
         [
-          "2. Starta i MATLAB",
-          "Öppna MATLAB och öppna start.m i den uppackade appmappen. Tryck Run. Alternativt: välj appmappen som Current Folder och skriv startCamera41_exp; i Command Window. Programmets huvudfönster öppnas."
+          "2. Öppna appen",
+          "Mata ut skivavbilden och öppna appen från Program. Apparna är ad hoc-signerade. Skivavbilden saknar Apple-notarisering."
         ],
         [
-          "Krav och medföljande RAW-läsare",
-          "Verifierad miljö: macOS på Apple Silicon med MATLAB R2025b. Image Processing Toolbox behövs för manuell områdesredigering med drawrectangle. MATLAB har egen licens. LibRaw-läsaren medföljer och väljs efter Mac-arkitektur. Ingen Homebrew-installation behövs i den verifierade miljön. Intel-läsare och bibliotek ingår, men körning i MATLAB på en fysisk Intel-Mac är inte verifierad. Windows, Linux och äldre MATLAB-versioner är inte kvalificerade för denna release."
+          "Verifiering",
+          "Hela Gold 200-flödet med fyra filer provades på Apple Silicon. Tidigare Intel-byggen provades via Rosetta. Prov på en fysisk Intel-Mac återstår."
         ],
         [
-          "Efter installation eller uppdatering",
-          "Inga provbilder ingår. Lägg till egna RAW-filer med Add FB+F RAW files. Loggen skapas i logs/camera41_exp.jsonl i appmappen; öppna den via Log > Open complete log. Stäng Camera-41_exp-fönstret innan programfiler byts ut och starta sedan om appen. Om macOS blockerar den hämtade läsaren, granska säkerhetsmeddelandet och loggen."
+          "RAW-filer och diagnostik",
+          "Lägg till egna filmbasbilder med Add FB+F RAWs…. Open log visar den lokala diagnostikloggen. Avsluta appen innan du ersätter den."
         ],
         [
           "Kontrollera hämtningen",
-          "Release-sidan innehåller SHA256SUMS.txt. På macOS kan du jämföra en fil med kommandot shasum -a 256 följt av filnamnet. ZIP-paketets RELEASE_MANIFEST.json anger källkodens commit och kontrollsummor för filerna. Fullständiga installationsuppgifter finns även i INSTALL.md."
+          "Jämför installationsfilens kontrollsumma med den medföljande SHA-256-filen. På macOS kan du köra shasum -a 256 följt av filnamnet. Se INSTALL.md för start från källkod."
         ],
         [
-          "Nativ RAW-läsare",
-          "LibRaw-läsaren kontrolleras mot den fysiska ARM-/Intel-processorn, även när reservbinären utan ändelse används. En binär för fel arkitektur avvisas. Lokal ombyggnad kräver matchande nativa LibRaw- och libomp-bibliotek. Körning på fysisk Intel-Mac är ännu inte verifierad."
+          "Medföljande RAW-läsare",
+          "Den fristående appen innehåller LibRaw-läsaren för sin processorarkitektur. Exponeringsbedömningen använder RAW-sensorvärden utan demosaikering från RGGB-sensorer."
         ]
       ]
     },
@@ -62,11 +62,11 @@
       "sections": [
         [
           "Håll uppställningen fast",
-          "Använd samma kamera, ISO, bländare, ljusläge och geometri under hela serien. Välj bländare först och variera bara exponeringstiden. Om ljus, filmprov eller uppställning ändras ska du göra en separat jämförelse. Uppgifterna Light source / mode / setup och Physical film base + fog identification hjälper dig att hålla reda på vad som mättes."
+          "Använd samma kamera, ISO, bländare, ljusläge och geometri under hela serien. Välj bländare först och variera bara exponeringstiden. Om ljus, filmprov eller uppställning ändras ska du göra en separat jämförelse. Uppgifterna Light setup och Film base + fog hjälper dig att hålla reda på vad som mättes."
         ],
         [
           "Läs in och förhandsvisa",
-          "Add FB+F RAW files lägger till en eller flera filer. Ytterligare filval läggs till i listan; samma sökväg dubbleras inte. Filväljaren minns senaste RAW-mappen även efter omstart. Remove selected tar bort vald rad ur provserien, inte originalfilen.\nMarkera en rad och välj Preview selected RAW för att se bilden. RAW preview är en visningsbild med ljushetsanpassning; skärmens ljushet avgör inte om mätningen godkänns."
+          "Add FB+F RAWs… lägger till en eller flera filer. Ytterligare filval läggs till i listan; samma sökväg dubbleras inte. Filväljaren minns senaste RAW-mappen även efter omstart. Remove selected tar bort vald rad ur provserien, inte originalfilen.\nMarkera en rad och välj Preview selected för att se bilden. RAW preview är en visningsbild med ljushetsanpassning; skärmens ljushet avgör inte om mätningen godkänns."
         ],
         [
           "Automatiskt område",
@@ -74,7 +74,7 @@
         ],
         [
           "När en varning kräver justering",
-          "Vid tydlig avvikelse visas den berörda bilden med ett gult föreslaget område. Läs varningen. Flytta eller ändra rutan till en ren tom yta; Adjust marked area används för manuell justering. Koordinaterna X, Y, Width och Height gäller originalbildens synliga sensorpixlar. Rutan begränsas till bildytan.\nVälj inte bort en ljust klippt del av en verklig FB+F-yta enbart för att få PASS. Om rätt tomma filmprov ändå inte kan identifieras behöver du ta om provbilden."
+          "Vid en varning visas den berörda bilden med det föreslagna området markerat i gult. Dra en ny ruta över ren tom film eller ändra X, Y, Width och Height i synliga sensorpixlar. Samma område används för hela serien."
         ]
       ]
     },
@@ -88,15 +88,15 @@
         ],
         [
           "Diagram och tabell",
-          "Exposure comparison visar signal i RAW-koder och marginal i EV mot exponeringstiden, separat för R, G1, G2 och B. Med en enda bild visas bara en punkt per kanal. Lägg till flera tider för en jämförelse.\nTabellen visar fil, tid, status, minsta marginal och största kanalandel vid/över gränsen. Textfältet redovisar mätvärden och orsak per kanal. Positiv marginal betyder utrymme under gränsen; negativ marginal betyder att percentilvärdet ligger över den."
+          "Exposure comparison visar slutartider i 1/3 EV-steg med kamerans beteckningar, till exempel 1/20, 1/15 och 1/10. Övre diagrammet visar median RAW-signal över svartnivån i sensorkoder. Nedre diagrammet visar marginalen till RAW-linjäritetsgränsen i EV. Vid 0 EV når den uppmätta percentilen gränsen. Den streckade linjen vid 1/3 EV markerar minsta marginal för PASS. Results visar fil, tid, status, signal, marginal och andel vid eller över gränsen per kanal."
         ],
         [
           "Förslag är inte alltid ett färdigt val",
-          "Ingen godkänd exponering: ta kortare tider om rätt FB+F-yta klipper.\nLängsta godkända tid utan högre underkänd bild: komplettera serien med en högre tid för att avgränsa valet.\nFör glest intervall till nästa högre icke godkända tid: prova mellanliggande tid.\nDen interna proportionalitetskontrollen kräver minst tre olika godkända tider över minst ett steg (2× tid). Mindre underlag betyder otillräcklig kontroll, inte automatiskt att kameran är felaktig."
+          "Proportionalitetskontrollen jämför signalen per sekund med kanalens median. Den kräver minst tre olika godkända tider som spänner över minst ett exponeringssteg. En avvikelse över 5 % i någon kanal ger en granskningsvarning. I Gold 200-testet klarade 1/20, 1/15 och 1/10 s klippkriterierna. Vid 1/8 s gav gröna kanaler REVIEW. Appen visade 1/10 s som kandidat med en proportionalitetsvarning (största avvikelse 5,23 %)."
         ],
         [
           "Välj tid med marginal",
-          "Listan längst ned innehåller uppmätta godkända tider. Appens kandidat är förvald. Bekräfta ditt val med en ny FB+F-bild innan en längre inläsning. Använd inte längre tid bara för att förhandsvisningen ser bättre ut. Återkom till provet om kamerainställningar, ljus eller filmens bas ändras."
+          "Choose a measured time listar tider där alla upprepningar klarade klippkriterierna. Granska en eventuell proportionalitetsvarning innan du använder kandidaten. Kontrollera vald tid med en ny FB+F-bild."
         ]
       ]
     },
@@ -110,20 +110,20 @@
         ],
         [
           "När något verkar fel",
-          "Inget syns i RAW preview: markera en fil och tryck Preview selected RAW. Diagrammet finns i den andra fliken, Exposure comparison.\nIngen tid kan väljas: läs kanalrapporten. Alla bilder kan vara REVIEW eller FAIL. En enda underkänd bild räcker inte för att hitta en bra tid.\nRAW file missing: kontrollera att filen eller dess externa disk fortfarande finns tillgänglig.\nSeg filväljare eller felmeddelande: använd loggen. Den skiljer förberedelse, dialog, filregistrering och analys åt.\nEfter uppdaterad programkod: stäng Camera-41_exp-fönstret och starta appen igen."
+          "Välj en fil och tryck Preview selected. Vid analysfel kan du läsa statusmeddelandet och öppna den lokala loggen. Kontrollera att RAW-filen och disken den ligger på fortfarande är tillgängliga."
         ],
         [
           "Logg och sparade uppgifter",
-          "Log > Open complete log öppnar logs/camera41_exp.jsonl i appmappen. Varje post har UTC-tid, process-ID, händelse och detaljer. Filval, inställningar, mätningar, varaktigheter och fel loggas. Filväljarens tid inkluderar även tiden du själv väljer filer; den säger inte ensam när dialogen först blev synlig.\nSenaste RAW-mapp sparas i MATLAB-inställningarna. Vald bildlista och övriga fönsterinställningar återställs inte efter stängning. Original-RAW ändras inte. Loggen är lokal och ingår inte i Git."
+          "Open log öppnar den lokala diagnostikloggen. Den fristående appen sparar den i ~/Library/Logs/Camera-41_exp/camera41_exp.jsonl. Vid körning från källkod sparas den i logs/camera41_exp.jsonl. Appen kommer ihåg senaste RAW-mappen. Efter omstart är bildlistan tom."
         ],
         [
           "Krav, version och licenser",
-          "Denna handbok avser Camera-41_exp v0.1.4, 27 oktober 2026. MATLAB och medföljande LibRaw-läsare krävs; Apple Silicon-versionen är provad på utvecklingsdatorn. Vid flytt till annan dator kan läsaren behöva byggas om med LibRaw och pkg-config.\nProgrammets egen kod och dokumentation: GPL-3.0-or-later. Full licens finns i LICENSE och information i LICENSE_NOTICE.md. Tredjepartslicenser för LibRaw, JPEG-turbo, libomp och Little CMS finns i third_party/licenses. MATLAB har egen licens."
+          "Handboken gäller Pythonappen i v1.0.0. Camera-41_exp använder GPL-3.0-or-later. Se LICENSE, LICENSE_NOTICE.md och medföljande tredjepartslicenser."
         ]
       ]
     }
   ],
-  "version": "0.1.4",
+  "version": "1.0.0",
   "author": "Christer Törnkvist",
   "email": "christer@borgasundsfotografiska.se",
   "github": "https://github.com/chto0703009/Camera-41_exp"

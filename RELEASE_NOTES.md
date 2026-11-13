@@ -1,3 +1,33 @@
+# Camera-41_exp v1.0.0
+
+Camera-41_exp helps set the digital camera exposure when digitising C-41 colour and black-and-white (B&W) film negatives with a VALOI setup. At a fixed aperture, it compares RAW captures of clear film base plus fog to find a shutter speed that gives a strong signal with room before clipping. Too much exposure can clip a sensor channel. Too little leaves a weak signal, making noise more visible when the scan is brightened.
+
+Camera-41_exp moves to a standalone Python app for macOS. The installer
+packages separate Apple Silicon and Intel apps with Python and LibRaw.
+The English interface includes native file selection, RAW preview, automatic
+and manual measurement areas, a per-channel results report and two charts.
+
+- Shutter times on the charts follow 1/3 EV steps with familiar camera labels.
+  The upper chart shows median RAW signal above black. The lower chart
+  shows headroom before the RAW linearity limit and marks the 1/3 EV threshold.
+- The proportionality check handles metadata rounding when three passing
+  shutter times span exactly one stop. It flags departures above 5% from
+  the median signal per second in each channel.
+- The English and Swedish handbooks and quick guides cover installation,
+  exposure selection and the transfer of current captures to PRE tab 7.
+
+The four-file Gold 200 test in the corrected Apple Silicon app used the
+automatic area throughout. The 1/20, 1/15 and 1/10 s captures passed the
+clipping criteria. The 1/8 s capture required review due to limited green
+channel headroom. The app retained 1/10 s as the candidate and warned that
+the largest proportionality deviation was 5.23%, above the 5% threshold.
+Earlier Intel builds were tested via Rosetta. Physical Intel validation
+remains outstanding.
+
+See [installation](INSTALL.md) and the [handbooks](README.md#handbooks--handböcker).
+
+---
+
 # Camera-41_exp v0.1.4 - 2026-10-27
 
 - Choose LibRaw for the physical ARM/Intel Mac CPU, including when MATLAB runs under Rosetta.

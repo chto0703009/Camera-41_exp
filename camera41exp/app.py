@@ -1,0 +1,574 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+"""Native macOS interface for Camera-41_exp."""
+
+import argparse
+from dataclasses import asdict
+from datetime import datetime
+from io import BytesIO
+import json
+import math
+from pathlib import Path
+import sys
+from threading import Thread
+
+import AppKit as A
+from Foundation import NSData, NSObject, NSMakeRect
+import numpy as np
+import objc
+from PIL import Image, ImageDraw
+from PyObjCTools import AppHelper
+
+from camera41exp.exposure import (
+    AreaReview, CHANNELS, PASS_MARGIN, RAW_EXTENSIONS, ROOT, analyse, automatic_area, decode, raw_probe,
+)
+
+VERSION = (ROOT / "VERSION").read_text().strip()
+PREFERENCES = A.NSUserDefaults.standardUserDefaults()
+LOG_PATH = (Path.home() / "Library/Logs/Camera-41_exp/camera41_exp.jsonl"
+            if getattr(sys, "frozen", False) else ROOT / "logs/camera41_exp.jsonl")
+HANDOFF = (
+    "Capture the current film’s FB+F and two independent dark RAWs at the chosen "
+    "shutter time, with the same camera, ISO and aperture. Load them in PRE tab 7 "
+    "to measure noise and S/N."
+)
+SELECTION_MESSAGES = {
+    "NO_PASSING_EXPOSURE": "No shutter time passed in every replicate.",
+    "PROVISIONAL_ADD_HIGHER_EXPOSURE": "Provisional. Add a longer exposure to establish the upper bracket.",
+    "PROVISIONAL_REFINE_BRACKET": "Provisional. Measure a time between the passing and upper bracket.",
+    "HIGHEST_BRACKETED_PASS_EXPOSURE_ONLY": "Highest passing time within a bracket of one third EV.",
+    "REVIEW_LINEAR_RESPONSE_BEFORE_USING_CANDIDATE": "Review the linear response before using this time.",
+}
+
+
+def log(event, **details):
+    try:
+        LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        with LOG_PATH.open("a", encoding="utf-8") as stream:
+            stream.write(json.dumps({"Timestamp": datetime.now().astimezone().isoformat(),
+                                     "Event": event, **details}, ensure_ascii=False) + "\n")
+    except OSError as error:
+        print(f"Camera-41_exp log: {error}", file=sys.stderr)
+
+
+def native_image(image):
+    buffer = BytesIO()
+    image.save(buffer, format="PNG")
+    content = buffer.getvalue()
+    return A.NSImage.alloc().initWithData_(NSData.dataWithBytes_length_(content, len(content)))
+
+
+def preview_image(capture):
+    source = capture.linear
+    h, w = (size - size % 2 for size in source.shape)
+    reduced = sum(source[r:h:8, c:w:8] for r, c in ((0, 0), (0, 1), (1, 0), (1, 1))) / 4
+    image = Image.fromarray(np.uint8(np.sqrt(np.clip(reduced, 0, 1)) * 255))
+    return image.resize((900, max(1, round(900 * h / w))))
+
+
+# Nominal camera display values for successive 1/3 EV positions.
+SHUTTER_DENOMINATORS = (
+    12500, 10000, 8000, 6400, 5000, 4000, 3200, 2500, 2000, 1600,
+    1250, 1000, 800, 640, 500, 400, 320, 250, 200, 160, 125, 100,
+    80, 60, 50, 40, 30, 25, 20, 15, 13, 10, 8, 6, 5, 4,
+)
+SHUTTER_SECONDS = (
+    .3, .4, .5, .6, .8, 1, 1.3, 1.6, 2, 2.5, 3.2, 4, 5, 6, 8, 10,
+    13, 15, 20, 25, 30,
+)
+SHUTTER_SCALE = (
+    [(1 / n, f"1/{n}") for n in SHUTTER_DENOMINATORS]
+    + [(t, f"{t:g}") for t in SHUTTER_SECONDS]
+)
+
+
+def shutter_axis(seconds):
+    nominal = np.log2([t for t, _ in SHUTTER_SCALE])
+    positions = []
+    for time in seconds:
+        log_time = math.log2(time)
+        nearest = int(np.argmin(np.abs(nominal - log_time)))
+        if abs(log_time - nominal[nearest]) <= .12:
+            positions.append(float(nearest))
+        elif log_time < nominal[0]:
+            positions.append(3 * (log_time - nominal[0]))
+        elif log_time > nominal[-1]:
+            positions.append(len(nominal) - 1 + 3 * (log_time - nominal[-1]))
+        else:
+            positions.append(float(np.interp(log_time, nominal, np.arange(len(nominal)))))
+    low, high = math.floor(min(positions)), math.ceil(max(positions))
+    if low == high:
+        low, high = low - 1, high + 1
+    ticks = []
+    for index in range(low, high + 1):
+        if index < 0:
+            label = f"1/{round(SHUTTER_DENOMINATORS[0] * 2**(-index/3))}"
+        elif index >= len(SHUTTER_SCALE):
+            label = f"{SHUTTER_SECONDS[-1] * 2**((index-len(SHUTTER_SCALE)+1)/3):.3g}"
+        else:
+            label = SHUTTER_SCALE[index][1]
+        ticks.append((index, label))
+    return positions, ticks
+
+
+def comparison_image(rows):
+    image = Image.new("RGB", (900, 570), "white")
+    draw = ImageDraw.Draw(image)
+    positions, ticks = shutter_axis([row.seconds for row in rows])
+    low, high = ticks[0][0], ticks[-1][0]
+    colors = ("#b52235", "#19783c", "#557814", "#275aaa")
+    for name, title, offset in (("signal", "Median RAW signal above black (sensor codes)", 0),
+                                ("margin", "Headroom before clipping (EV)", 285)):
+        values = np.array([getattr(row, name) for row in rows])
+        if name == "signal":
+            minimum, maximum = 0, max(1, float(values.max()))
+        else:
+            minimum = min(0, float(values.min()))
+            maximum = max(PASS_MARGIN, float(values.max()))
+        raw_step = (maximum - minimum) / 5
+        magnitude = 10 ** math.floor(math.log10(raw_step))
+        step = next(multiplier * magnitude for multiplier in (1, 2, 2.5, 5, 10)
+                    if multiplier * magnitude >= raw_step)
+        lower_tick, upper_tick = math.floor(minimum / step), math.ceil(maximum / step)
+        minimum, maximum = lower_tick * step, upper_tick * step
+        x0, y0, x1, y1 = 90, offset + 58, 865, offset + 226
+        draw.text((x0, offset + 8), title, fill="black", font_size=17)
+        subtitle = ("Higher values mean more signal from the film base." if name == "signal"
+                    else "Higher values mean more room before clipping. At 0 EV the signal reaches the limit.")
+        draw.text((x0, offset + 32), subtitle, fill="#444444", font_size=13)
+        for i, color in enumerate(colors):
+            draw.text((x1 - 175 + 43*i, offset + 13), CHANNELS[i], fill=color, font_size=14)
+
+        def ordinate(value):
+            return y1 - (value - minimum) / (maximum - minimum) * (y1 - y0)
+
+        for index in range(lower_tick, upper_tick + 1):
+            value = index * step
+            y = ordinate(value)
+            draw.line((x0, y, x1, y), fill="#d1d5db")
+            label = f"{value:,.8f}".rstrip("0").rstrip(".")
+            draw.text((x0-8, y), label, anchor="rm", fill="black", font_size=13)
+        def abscissa(position):
+            return x0 + (x1-x0) * (position-low) / (high-low)
+
+        label_every = max(1, math.ceil((high-low) / 12))
+        for tick, label in ticks:
+            x = abscissa(tick)
+            draw.line((x, y0, x, y1), fill="#e3e6e9")
+            draw.line((x, y1, x, y1+4), fill="#606060")
+            if (tick-low) % label_every == 0:
+                draw.text((x, y1+8), label, anchor="mt", fill="black", font_size=13)
+        draw.text(((x0+x1)//2, y1+32), "Shutter speed (s) · 1/3 EV steps",
+                  anchor="mt", fill="black", font_size=14)
+        if name == "margin":
+            y = ordinate(PASS_MARGIN)
+            for x in range(x0, x1, 14):
+                draw.line((x, y, min(x+7, x1), y), fill="#505050")
+            label = "Minimum headroom for PASS: 1/3 EV"
+            left, top, right, bottom = draw.textbbox((x1-8, y-7), label, anchor="rb", font_size=13)
+            draw.rectangle((left-4, top-2, right+4, bottom+2), fill="white")
+            draw.text((x1-8, y-7), label, anchor="rb", fill="#333333", font_size=13)
+        plotted_x = [abscissa(position) for position in positions]
+        for i, color in enumerate(colors):
+            points = list(zip(plotted_x, map(ordinate, values[:, i])))
+            if len(points) > 1:
+                draw.line(points, fill=color, width=2)
+            for x, y in points:
+                draw.ellipse((x-3, y-3, x+3, y+3), fill=color)
+    return image
+
+
+class ImagePanel(A.NSView):
+    def isFlipped(self):
+        return True
+
+    def drawRect_(self, rect):
+        A.NSColor.controlBackgroundColor().setFill()
+        A.NSRectFill(A.NSIntersectionRect(rect, self.bounds()))
+        if self.image is None:
+            return
+        w, h = self.image.size()
+        size = self.bounds().size
+        factor = min(size.width / w, size.height / h)
+        self.frame_image = NSMakeRect((size.width-w*factor)/2, (size.height-h*factor)/2, w*factor, h*factor)
+        self.image.drawInRect_fromRect_operation_fraction_respectFlipped_hints_(
+            self.frame_image, A.NSZeroRect, A.NSCompositingOperationSourceOver, 1.0, True, None
+        )
+        if self.owner and self.owner.sensor:
+            w, h = self.owner.sensor
+            x, y, rw, rh = self.drag_roi or self.owner.roi
+            origin, size = self.frame_image.origin, self.frame_image.size
+            A.NSColor.systemYellowColor().setStroke()
+            outline = A.NSBezierPath.bezierPathWithRect_(NSMakeRect(
+                origin.x+(x-1)*size.width/w, origin.y+(y-1)*size.height/h,
+                rw*size.width/w, rh*size.height/h,
+            ))
+            outline.setLineWidth_(2)
+            outline.stroke()
+
+    @objc.python_method
+    def sensor_point(self, event):
+        p = self.convertPoint_fromView_(event.locationInWindow(), None)
+        origin, size = self.frame_image.origin, self.frame_image.size
+        w, h = self.owner.sensor
+        return (max(0, min(w, round((p.x-origin.x)*w/size.width))),
+                max(0, min(h, round((p.y-origin.y)*h/size.height))))
+
+    def mouseDown_(self, event):
+        if self.owner and self.owner.sensor and not self.owner.busy and hasattr(self, "frame_image"):
+            self.start = self.sensor_point(event)
+
+    def mouseDragged_(self, event):
+        if self.start is None:
+            return
+        x, y = self.sensor_point(event)
+        a, b = self.start
+        self.drag_roi = (1+min(x, a), 1+min(y, b), abs(x-a), abs(y-b))
+        self.setNeedsDisplay_(True)
+
+    def mouseUp_(self, event):
+        if self.start is None:
+            return
+        self.mouseDragged_(event)
+        roi = self.drag_roi
+        self.start = self.drag_roi = None
+        if min(roi[2:]) >= 20:
+            self.owner.set_roi(roi)
+            self.owner.automatic.setState_(A.NSControlStateValueOff)
+            self.owner.manual_needed = False
+            self.owner.settingsChanged_(None)
+        self.setNeedsDisplay_(True)
+
+
+class Controller(NSObject):
+    @objc.python_method
+    def button(self, title, action):
+        button = A.NSButton.buttonWithTitle_target_action_(title, self, action)
+        self.controls.append(button)
+        return button
+
+    @objc.python_method
+    def stack(self, vertical, *views):
+        stack = A.NSStackView.stackViewWithViews_(views)
+        stack.setOrientation_(A.NSUserInterfaceLayoutOrientationVertical if vertical
+                              else A.NSUserInterfaceLayoutOrientationHorizontal)
+        stack.setAlignment_(A.NSLayoutAttributeLeading if vertical else A.NSLayoutAttributeCenterY)
+        stack.setSpacing_(8)
+        return stack
+
+    @objc.python_method
+    def field(self, width):
+        field = A.NSTextField.textFieldWithString_("")
+        field.setDelegate_(self)
+        field.widthAnchor().constraintGreaterThanOrEqualToConstant_(width).setActive_(True)
+        self.controls.append(field)
+        return field
+
+    @objc.python_method
+    def panel(self, owner):
+        panel = ImagePanel.alloc().initWithFrame_(NSMakeRect(0, 0, 600, 300))
+        panel.setWantsLayer_(True)
+        panel.layer().setMasksToBounds_(True)
+        panel.image = panel.drag_roi = panel.start = None
+        panel.owner = owner
+        return panel
+
+    @objc.python_method
+    def build(self):
+        self.paths, self.controls = [], []
+        self.busy = self.manual_needed = False
+        self.sensor = None
+        self.roi = (1, 1, 100, 100)
+        self.window = A.NSWindow.alloc().initWithContentRect_styleMask_backing_defer_(
+            NSMakeRect(80, 80, 1120, 790),
+            A.NSWindowStyleMaskTitled | A.NSWindowStyleMaskClosable | A.NSWindowStyleMaskResizable,
+            A.NSBackingStoreBuffered, False,
+        )
+        self.window.setTitle_(f"Camera-41_exp {VERSION} — Digital camera setup")
+        self.window.setMinSize_((900, 640))
+        self.window.setDelegate_(self)
+        self.window.setReleasedWhenClosed_(False)
+        self.files = A.NSPopUpButton.alloc().initWithFrame_pullsDown_(NSMakeRect(0, 0, 320, 24), False)
+        self.files.addItemWithTitle_("No RAW files")
+        self.files.widthAnchor().constraintEqualToConstant_(315).setActive_(True)
+        self.controls.append(self.files)
+        buttons = self.stack(False, self.button("Add FB+F RAWs…", "addFiles:"), self.files,
+                             self.button("Remove selected", "removeFile:"), self.button("Preview selected", "preview:"))
+        self.light, self.sample = self.field(245), self.field(245)
+        fields = self.stack(False, A.NSTextField.labelWithString_("Light setup"), self.light,
+                            A.NSTextField.labelWithString_("Film base + fog"), self.sample)
+        self.automatic = A.NSButton.checkboxWithTitle_target_action_("Automatic area", self, "settingsChanged:")
+        self.confirm = A.NSButton.checkboxWithTitle_target_action_("Same FB+F sample in all RAWs", self, "settingsChanged:")
+        self.controls.extend([self.automatic, self.confirm])
+        self.automatic.setState_(A.NSControlStateValueOn)
+        self.coords = [self.field(58) for _ in range(4)]
+        coordinates = [item for label, field in zip(("X", "Y", "Width", "Height"), self.coords)
+                       for item in (A.NSTextField.labelWithString_(label), field)]
+        area = self.stack(False, self.automatic, *coordinates, self.confirm)
+        self.set_roi(self.roi)
+
+        self.preview_panel, self.graph = self.panel(self), self.panel(None)
+        self.report = A.NSTextView.alloc().initWithFrame_(NSMakeRect(0, 0, 600, 200))
+        self.report.setEditable_(False)
+        self.report.setFont_(A.NSFont.monospacedSystemFontOfSize_weight_(13, A.NSFontWeightRegular))
+        self.report.setVerticallyResizable_(True)
+        self.report.setAutoresizingMask_(A.NSViewWidthSizable)
+        scroll = A.NSScrollView.alloc().initWithFrame_(NSMakeRect(0, 0, 600, 200))
+        scroll.setHasVerticalScroller_(True)
+        scroll.setDocumentView_(self.report)
+        self.tabs = A.NSTabView.alloc().initWithFrame_(NSMakeRect(0, 0, 600, 300))
+        for identifier, name, view in (("preview", "RAW preview", self.preview_panel),
+                                        ("results", "Results", scroll),
+                                        ("comparison", "Exposure comparison", self.graph)):
+            tab = A.NSTabViewItem.alloc().initWithIdentifier_(identifier)
+            tab.setLabel_(name)
+            tab.setView_(view)
+            self.tabs.addTabViewItem_(tab)
+        self.tabs.heightAnchor().constraintGreaterThanOrEqualToConstant_(350).setActive_(True)
+        self.status = A.NSTextField.wrappingLabelWithString_(
+            "Add a film-base bracket at fixed ISO and aperture. Preview a RAW to inspect or drag the yellow measurement area."
+        )
+        self.status.setContentHuggingPriority_forOrientation_(750, A.NSLayoutConstraintOrientationVertical)
+        self.status.setContentCompressionResistancePriority_forOrientation_(1000, A.NSLayoutConstraintOrientationVertical)
+        self.times = A.NSPopUpButton.alloc().initWithFrame_pullsDown_(NSMakeRect(0, 0, 200, 24), False)
+        self.times.setTarget_(self)
+        self.times.setAction_("chooseTime:")
+        self.times.addItemWithTitle_("Analyse first")
+        self.times.setEnabled_(False)
+        footer = self.stack(False, self.button("Analyse RAW images", "runAnalysis:"), self.times,
+                            self.button("Open log", "openLog:"))
+        container = self.window.contentView()
+        previous = None
+        for view in (buttons, fields, area, self.tabs, self.status, footer):
+            view.setTranslatesAutoresizingMaskIntoConstraints_(False)
+            container.addSubview_(view)
+            top = previous.bottomAnchor() if previous is not None else container.topAnchor()
+            view.topAnchor().constraintEqualToAnchor_constant_(top, 8 if previous else 14).setActive_(True)
+            view.leadingAnchor().constraintEqualToAnchor_constant_(container.leadingAnchor(), 14).setActive_(True)
+            trailing = view.trailingAnchor()
+            if view in (self.tabs, self.status):
+                trailing.constraintEqualToAnchor_constant_(container.trailingAnchor(), -14).setActive_(True)
+            else:
+                trailing.constraintLessThanOrEqualToAnchor_constant_(container.trailingAnchor(), -14).setActive_(True)
+                view.setContentHuggingPriority_forOrientation_(750, A.NSLayoutConstraintOrientationVertical)
+                view.setContentCompressionResistancePriority_forOrientation_(1000, A.NSLayoutConstraintOrientationVertical)
+            previous = view
+        footer.bottomAnchor().constraintEqualToAnchor_constant_(container.bottomAnchor(), -14).setActive_(True)
+        self.update_controls()
+        self.window.center()
+        return self.window
+
+    @objc.python_method
+    def set_roi(self, roi):
+        self.roi = roi
+        for field, value in zip(self.coords, roi):
+            field.setIntegerValue_(value)
+
+    @objc.python_method
+    def update_controls(self):
+        for control in self.controls:
+            control.setEnabled_(not self.busy)
+        manual = self.automatic.state() == A.NSControlStateValueOff
+        for field in self.coords:
+            field.setEditable_(manual)
+        self.times.setEnabled_(not self.busy and self.times.numberOfItems() > 1)
+
+    def controlTextDidChange_(self, notification):
+        if notification.object() in self.coords:
+            self.roi = tuple(field.integerValue() for field in self.coords)
+            self.manual_needed = min(self.roi) <= 0 or min(self.roi[2:]) < 20
+            self.preview_panel.setNeedsDisplay_(True)
+        self.settingsChanged_(None)
+
+    def settingsChanged_(self, sender):
+        self.times.removeAllItems()
+        self.times.addItemWithTitle_("Analyse first")
+        self.report.setString_("")
+        self.graph.image = None
+        self.graph.setNeedsDisplay_(True)
+        self.status.setStringValue_("Settings changed. Analyse to update the exposure result.")
+        self.update_controls()
+
+    @objc.python_method
+    def update_files(self):
+        self.files.removeAllItems()
+        if self.paths:
+            self.files.addItemsWithTitles_([str(path) for path in self.paths])
+        else:
+            self.files.addItemWithTitle_("No RAW files")
+        self.preview_panel.image = None
+        self.preview_panel.setNeedsDisplay_(True)
+        self.sensor = None
+        self.manual_needed = False
+        self.automatic.setState_(A.NSControlStateValueOn)
+        self.settingsChanged_(None)
+        log("files.updated", Files=[str(path) for path in self.paths])
+
+    def addFiles_(self, sender):
+        panel = A.NSOpenPanel.openPanel()
+        panel.setAllowsMultipleSelection_(True)
+        panel.setAllowedFileTypes_(list(RAW_EXTENSIONS))
+        folder = PREFERENCES.stringForKey_("Camera41ExpPythonRAWFolder")
+        if folder and Path(folder).is_dir():
+            panel.setDirectoryURL_(A.NSURL.fileURLWithPath_(folder))
+        if panel.runModal() == A.NSModalResponseOK:
+            additions = [Path(url.path()).resolve() for url in panel.URLs()]
+            self.paths = list(dict.fromkeys(self.paths + additions))
+            PREFERENCES.setObject_forKey_(str(additions[0].parent), "Camera41ExpPythonRAWFolder")
+            self.update_files()
+
+    def removeFile_(self, sender):
+        if self.paths:
+            del self.paths[self.files.indexOfSelectedItem()]
+            self.update_files()
+
+    @objc.python_method
+    def background(self, message, work, complete):
+        self.busy = True
+        self.status.setStringValue_(message)
+        self.update_controls()
+
+        def run():
+            try:
+                result = work()
+            except Exception as error:
+                AppHelper.callAfter(finish, None, error)
+            else:
+                AppHelper.callAfter(finish, result, None)
+
+        def finish(result, error):
+            self.busy = False
+            self.update_controls()
+            if isinstance(error, AreaReview):
+                self.manual_needed = True
+                self.files.selectItemAtIndex_(self.paths.index(error.path))
+                self.start_preview(error.path, error)
+            elif error:
+                self.status.setStringValue_(str(error))
+                log("error", Message=str(error))
+            else:
+                complete(result)
+
+        Thread(target=run, daemon=True).start()
+
+    @objc.python_method
+    def start_preview(self, path, review=None):
+        def work():
+            capture = decode(path)
+            area, reasons = automatic_area(capture.linear)
+            return preview_image(capture), capture.linear.shape[::-1], area, reasons
+
+        def complete(result):
+            image, self.sensor, area, reasons = result
+            if review or self.automatic.state() == A.NSControlStateValueOn:
+                self.set_roi(area)
+            if review:
+                self.automatic.setState_(A.NSControlStateValueOff)
+                self.update_controls()
+            self.preview_panel.image = native_image(image)
+            self.preview_panel.setNeedsDisplay_(True)
+            self.tabs.selectTabViewItemWithIdentifier_("preview")
+            self.status.setStringValue_(str(review) if review else
+                "Display preview. Drag the yellow area to measure a clean part of the film base.")
+            log("preview.complete", File=str(path), ROI=self.roi, AreaWarnings=reasons)
+
+        self.background("Decoding selected RAW…", work, complete)
+
+    def preview_(self, sender):
+        if self.paths:
+            self.start_preview(self.paths[self.files.indexOfSelectedItem()])
+
+    def runAnalysis_(self, sender):
+        light, sample = (str(field.stringValue()).strip() for field in (self.light, self.sample))
+        if not self.paths or not light or not sample or not self.confirm.state():
+            self.status.setStringValue_("Add RAWs, describe the light and film base, and confirm the same FB+F sample.")
+            return
+        if self.manual_needed:
+            self.status.setStringValue_("Adjust the yellow measurement area before analysing again.")
+            return
+        roi = None if self.automatic.state() else tuple(field.integerValue() for field in self.coords)
+        paths = self.paths.copy()
+        self.settingsChanged_(None)
+        log("analysis.begin", Files=[str(path) for path in paths], Light=light, Sample=sample, ROI=roi)
+        self.background("Analysing RAW exposures…", lambda: analyse(paths, roi), self.show_results)
+
+    @objc.python_method
+    def show_results(self, result):
+        roi, rows, selection = result
+        self.set_roi(roi)
+        self.preview_panel.setNeedsDisplay_(True)
+        lines = [SELECTION_MESSAGES[selection.status], f"Measurement area [x y width height]  {roi}",
+                 f"Proportionality  {selection.proportionality.replace('_', ' ').lower()}",
+                 "Pass limits per channel  ≥ ⅓ EV headroom and < 0.01% at the linearity limit."]
+        if selection.candidate is not None:
+            lines.append(f"Suggested measured time  {selection.candidate:.8g} s")
+        if selection.next_test is not None:
+            lines.append(f"Next test  {selection.next_test:.8g} s")
+        for row in rows:
+            lines += ["", f"{Path(row.path).name}   {row.seconds:.8g} s   {row.status}"]
+            for i, channel in enumerate(CHANNELS):
+                lines.append(f"  {channel:2s}  {row.signal[i]:9.1f} codes  {row.margin[i]:7.3f} EV"
+                             f"  {100*row.clipped[i]:9.4f}%  {row.channel_status[i]}")
+        lines += ["", HANDOFF]
+        self.report.setString_("\n".join(lines))
+        self.graph.image = native_image(comparison_image(rows))
+        self.graph.setNeedsDisplay_(True)
+        passing = sorted({row.seconds for row in rows if row.status == "PASS"}
+                         - {row.seconds for row in rows if row.status != "PASS"})
+        self.times.removeAllItems()
+        self.times.addItemWithTitle_("Choose a measured time" if passing else "No passing exposure")
+        for time in passing:
+            self.times.addItemWithTitle_(f"{time:.8g} s")
+            self.times.lastItem().setRepresentedObject_(time)
+        self.update_controls()
+        self.tabs.selectTabViewItemWithIdentifier_("results")
+        self.status.setStringValue_(SELECTION_MESSAGES[selection.status])
+        log("analysis.complete", ROI=roi, Measurements=[asdict(row) for row in rows],
+            Selection=asdict(selection), HasMeasuredNoise=False)
+
+    def chooseTime_(self, sender):
+        time = sender.selectedItem().representedObject()
+        if time is not None:
+            self.status.setStringValue_(f"Chosen time {time:.8g} s. {HANDOFF}")
+            log("time.chosen", Seconds=time)
+
+    def openLog_(self, sender):
+        log("log.open")
+        A.NSWorkspace.sharedWorkspace().openFile_(str(LOG_PATH))
+
+    def windowShouldClose_(self, window):
+        if self.busy:
+            self.status.setStringValue_("Wait for the RAW operation to finish before closing.")
+        return not self.busy
+
+    def windowWillClose_(self, notification):
+        A.NSApplication.sharedApplication().terminate_(None)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--startup-check", action="store_true")
+    parser.add_argument("--smoke-test", nargs="+", type=Path, metavar="RAW")
+    args = parser.parse_args()
+    app = A.NSApplication.sharedApplication()
+    app.setActivationPolicy_(A.NSApplicationActivationPolicyRegular)
+    controller = Controller.alloc().init()
+    window = controller.build()
+    if args.startup_check or args.smoke_test:
+        raw_probe()
+        if args.smoke_test:
+            paths = args.smoke_test
+            capture = decode(paths[0])
+            roi, _ = automatic_area(capture.linear)
+            assert native_image(preview_image(capture)) is not None
+            controller.show_results(analyse(paths, roi))
+            assert controller.graph.image is not None and controller.report.string()
+        print("CAMERA41_EXP_PYTHON_STARTUP_OK")
+        return
+    log("window.created", Version=VERSION)
+    window.makeKeyAndOrderFront_(None)
+    app.activateIgnoringOtherApps_(True)
+    AppHelper.runEventLoop()
+
+
+if __name__ == "__main__":
+    main()

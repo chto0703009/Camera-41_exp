@@ -1,38 +1,69 @@
-# Camera-41_exp v0.1.4
+# Camera-41_exp v1.0.0
+
+Camera-41_exp helps set the digital camera exposure when digitising C-41 colour and black-and-white (B&W) film negatives with a VALOI setup. At a fixed aperture, it compares RAW captures of clear film base plus fog to find a shutter speed that gives a strong signal with room before clipping. Too much exposure can clip a sensor channel. Too little leaves a weak signal, making noise more visible when the scan is brightened.
 
 [English summary and installation (PDF)](output/pdf/Camera41_exp_Summary_EN.pdf)
 
-For download/setup requirements, see [INSTALL.md](INSTALL.md) and [CHANGELOG.md](CHANGELOG.md).
+## Run the Python app on macOS
 
-Open `start.m` in MATLAB and press Run, or call `startCamera41_exp` from this folder.
+Open the standalone `Camera-41_exp.app` built for your Mac (Apple Silicon or Intel). See [installation](INSTALL.md) and [release notes](RELEASE_NOTES.md).
+It includes Python, the native AppKit interface and the LibRaw probe and runs
+without MATLAB. The locally built app is ad hoc signed.
 
-This app helps choose the digital-camera shutter time at a fixed selected aperture. Add blank film base + fog RAWs at different shutter times, document the light/sample and analyse. The app selects an edge-safe central area, checks for unexpected structure and compares RAW signal and clipping margin. A yellow region is shown for inspection or adjustment when needed. Choose a measured passing time in the list.
+To run from source with Python 3.13:
+
+```sh
+python3.13 -m venv .venv
+.venv/bin/python -m pip install -r requirements-app.txt
+.venv/bin/python -m camera41exp.app
+```
+
+You can then double-click `Start Camera-41_exp.command`. Select RAW files from
+the file picker, preview one and drag to set a manual measurement area if
+needed. Results show the four Bayer channels, the bracket recommendation and
+the next step in PRE. The **Exposure comparison** tab plots signal and clipping
+headroom against shutter time in 1/3 EV steps. The dashed line marks the
+minimum headroom of 1/3 EV for PASS.
+
+To build a standalone app, install `pyinstaller==6.22.3` into the same
+environment and run `.venv/bin/python tools/build_exp_python_app.py`. See [installation](INSTALL.md#run-or-build-from-source) for the Intel build dependencies. The app is created under
+`local-config/python-app/<architecture>/dist/`. Its executable accepts
+`--startup-check` and `--smoke-test /path/to/test.CR2`.
+
+The PDF handbooks describe the English Python interface.
+
+Add blank film base + fog RAWs at different shutter times, document the light/sample and analyse. The app selects an edge-safe central area, checks for unexpected structure and compares RAW signal and clipping margin. A yellow region is shown for inspection or adjustment when needed. Choose a measured passing time in the list.
 
 Camera-41_exp does not export a JSON handoff. At the chosen time, capture the current film's empty FB+F frame and two independent dark RAWs with the same camera, ISO, shutter and aperture. Load these in PRE tab 7 for signal/noise measurement. PRE includes those measured results in the film characterisation for NEG.
 
-The last RAW folder is remembered. The local application log is `logs/camera41_exp.jsonl`, available from **Log → Open complete log**. It includes timing, file choices, analyses and errors. Native dialog timing includes the user's file selection time. Logs are excluded from Git.
+The last RAW folder is remembered. **Open log** opens the Python app's
+diagnostic log, including file choices, analyses and errors. The standalone
+app stores it in `~/Library/Logs/Camera-41_exp/camera41_exp.jsonl`. Source runs
+store it in `logs/camera41_exp.jsonl`.
 
-MATLAB and the bundled LibRaw probe are required. Original RAWs are unchanged. Automatic uniformity screening is heuristic and does not establish physical film identity or production qualification. GPL-3.0-or-later; see LICENSE and third_party/licenses.
+Both interfaces use the bundled LibRaw probe. Original RAWs are unchanged. Automatic uniformity screening is heuristic and does not establish physical film identity or production qualification. GPL-3.0-or-later; see LICENSE and third_party/licenses.
 
 ## Handbooks / Handböcker
 
 - [English handbook (PDF)](output/pdf/Camera41_exp_Handbook_EN.pdf)
 - [Svensk handbok (PDF)](output/pdf/Camera41_exp_Handbook_SV.pdf)
+The following work instructions cover the wider Camera-41 workflow and refer to the earlier MATLAB interface. Use the v1.0.0 handbooks above for current installation and controls.
+
 - [Arbetsinstruktion för digitaliseringsexponering (PDF, svenska)](output/pdf/Camera41_EXP_Digitaliseringsexponering_SV.pdf) — FB+F-serie, exponeringsval och överlämning till Camera-41_pre.
 - [Digitisation exposure work instruction (PDF, English)](output/pdf/Camera41_EXP_Digitisation_Exposure_EN.pdf)
 
 Editable sources are in `docs/handbook/handbook_sv.json` and `handbook_en.json`. Rebuild both PDFs with `python tools/build_handbooks.py` (requires reportlab). The handbooks describe why FB+F exposure is used to avoid clipping, capture setup, automatic/manual areas, results, standalone operation and logging.
 
-[Sammanfattning på svenska (PDF)](output/pdf/Camera41_exp_Sammanfattning_SV.pdf) - fristående ensidesguide för v0.1.4.
+[Sammanfattning på svenska (PDF)](output/pdf/Camera41_exp_Sammanfattning_SV.pdf) — svensk ensidesguide för v1.0.0.
 
-## Pythonmiljö och datorbyte
+## Legacy MATLAB Python environment
 
-Programmet använder en egen `.venv` med Python 3.13.6 och samma fullständiga paketversioner som övriga aktiva Camera-41-, InkProf- och SpectraLab-program. Se [PYTHON_ENVIRONMENT.md](PYTHON_ENVIRONMENT.md) för installation, kontroll och säker ombyggnad.
+The MATLAB version checks a local Python 3.13.6 environment with the shared Camera-41, InkProf and SpectraLab package versions. See [PYTHON_ENVIRONMENT.md](PYTHON_ENVIRONMENT.md) for setup and maintenance.
 
 ### Native macOS RAW support
 
-LibRaw selection follows the physical Mac CPU, including when MATLAB runs under
-Rosetta. Both the architecture-suffixed executable and the unsuffixed fallback
+Source runs select LibRaw for the physical Mac CPU. A standalone app
+includes the LibRaw probe built for its labelled architecture. Both the architecture-suffixed executable and the unsuffixed fallback
 are checked for a matching Mach-O slice. A filename alone is not sufficient;
 a foreign-only fallback is rejected. Legacy saved architecture preferences do
 not override automatic hardware detection. Both ARM and Intel executables remain

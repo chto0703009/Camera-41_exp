@@ -1,3 +1,12 @@
+# Camera-41_exp v1.0.0
+
+- Introduce the standalone English Python app for macOS, with separate Apple Silicon and Intel builds.
+- Show camera-style shutter times in 1/3 EV steps, with labelled RAW signal and clipping headroom charts.
+- Handle shutter metadata rounding at the one-stop boundary for the proportionality check.
+- Update installation instructions, handbooks and quick guides. See the [release notes](RELEASE_NOTES.md) for the Gold 200 validation.
+
+---
+
 # Camera-41_exp v0.1.4 - 2026-10-27
 
 - Choose LibRaw for the physical ARM/Intel Mac CPU, including when MATLAB runs under Rosetta.
