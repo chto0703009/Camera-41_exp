@@ -32,7 +32,7 @@
       "sections": [
         [
           "1. Open the disk image",
-          "Open Camera-41_exp-1.0.0-python-macos.dmg. Drag the Apple Silicon app to Applications on an M-series Mac, or choose the Intel app for an Intel Mac."
+          "Open Camera-41_exp-1.0.1-python-macos.dmg. Drag the Apple Silicon app to Applications on an M-series Mac, or choose the Intel app for an Intel Mac."
         ],
         [
           "2. Open the app",
@@ -84,7 +84,7 @@
       "sections": [
         [
           "PASS, REVIEW and FAIL",
-          "PASS: every channel retains at least 1/3 EV headroom at the 99.9th percentile, with too few values at/above the linearity limit to trigger FAIL.\nREVIEW: no channel triggers FAIL, but at least one retains less than 1/3 EV margin. Do not increase exposure; try a slightly shorter time.\nFAIL: at least one channel has 0.01 percent or more of its measured values at/above the limit. First check the sample and measurement area. If they are correct, try a shorter shutter time.\nThe reference is the RAW linearity limit after black subtraction, not a JPEG histogram. Loss of linearity can matter before hard sensor saturation."
+          "PASS: every channel retains at least 1/3 EV headroom at the 99.9th percentile, with too few values at/above the linearity limit to trigger FAIL.\nREVIEW: no channel triggers FAIL, but at least one retains less than 1/3 EV margin. Do not increase exposure; try a slightly shorter time.\nFAIL: at least one channel has 0.01 percent or more of its measured values at/above the limit. First check the sample and measurement area. If they are correct, try a shorter shutter time.\nThe reference is the RAW linearity limit after black subtraction, not a JPEG histogram. Loss of linearity can matter before hard sensor saturation.\nLOW marks a channel whose median lies more than 8 EV below the clipping reference. Some cameras use LibRaw’s white level as the reference."
         ],
         [
           "Plots and table",
@@ -96,7 +96,7 @@
         ],
         [
           "Choose a time with margin",
-          "Choose a measured time lists the times for which all replicates passed the clipping criteria. Review any proportionality warning before using the candidate. Verify your chosen time with a fresh FB+F capture."
+          "Choose a measured time lists the times for which all replicates passed the clipping criteria. Review any proportionality warning before using the candidate. Verify your chosen time with a fresh FB+F capture. If the results contradict each other, the app asks you to repeat the series before choosing a time."
         ]
       ]
     },
@@ -118,12 +118,12 @@
         ],
         [
           "Requirements, edition and licences",
-          "This handbook covers the Python app in v1.0.0. Camera-41_exp uses GPL-3.0-or-later. See LICENSE, LICENSE_NOTICE.md and the bundled third-party notices."
+          "This handbook covers the Python app in v1.0.1. Camera-41_exp uses GPL-3.0-or-later. See LICENSE, LICENSE_NOTICE.md and the bundled third-party notices."
         ]
       ]
     }
   ],
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Christer Törnkvist",
   "email": "christer@borgasundsfotografiska.se",
   "github": "https://github.com/chto0703009/Camera-41_exp"

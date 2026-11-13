@@ -1,3 +1,20 @@
+# Camera-41_exp v1.0.1
+
+- Show the app icon, the purpose of the app and the steps expected of the user when the window opens.
+- Mark channels with a median more than 8 EV below the clipping reference as LOW. A dark frame no longer passes with a manual area.
+- Ask for a review when a series is inconsistent: clipping at a shorter time than a passing one, or low signal at a longer time.
+- Use LibRaw's white level where a RAW has no per-channel linearity limits, and say so in the results.
+- Add an application menu with Quit, Copy, Paste and Select All. Quitting waits for a running RAW operation.
+- Accept camera RAW files only, with a clear message for JPEG, TIFF and other files.
+- Read typed area coordinates correctly where the system groups thousands, as in "1 311".
+- Add Python tests, and `tools/build_dmg.py` for the disk image. The source release script no longer requires v0.1.4.
+- Keep `--startup-check` and `--smoke-test` out of the diagnostic log.
+
+- Reject malformed measurement coordinates and withhold shutter suggestions when the series is inconsistent.
+- Check that each packaged app was built from the current application source.
+
+---
+
 # Camera-41_exp v1.0.0
 
 - Introduce the standalone English Python app for macOS, with separate Apple Silicon and Intel builds.

@@ -32,7 +32,7 @@
       "sections": [
         [
           "1. Öppna skivavbilden",
-          "Öppna Camera-41_exp-1.0.0-python-macos.dmg. Dra Apple Silicon-appen till Program på en Mac med M-chip. Välj Intel-appen för en Intel-Mac."
+          "Öppna Camera-41_exp-1.0.1-python-macos.dmg. Dra Apple Silicon-appen till Program på en Mac med M-chip. Välj Intel-appen för en Intel-Mac."
         ],
         [
           "2. Öppna appen",
@@ -84,7 +84,7 @@
       "sections": [
         [
           "PASS, REVIEW och FAIL",
-          "PASS: alla fyra färgkanaler har minst 1/3 EV marginal vid 99,9-percentilen och för liten andel vid/över linjäritetsgränsen för FAIL.\nREVIEW: ingen kanal utlöser FAIL, men minst en har mindre än 1/3 EV marginal. Öka inte exponeringen; prova en något kortare tid.\nFAIL: minst en kanal har 0,01 procent eller mer av mätvärdena vid/över gränsen. Kontrollera först rätt filmprov och område. Om området är korrekt: prova kortare exponeringstid.\nGränsen är en RAW-linjäritetsgräns efter svartnivåsubtraktion, inte ett JPEG-histogram. Förlust av linearitet kan vara relevant redan innan hård sensormättnad."
+          "PASS: alla fyra färgkanaler har minst 1/3 EV marginal vid 99,9-percentilen och för liten andel vid/över linjäritetsgränsen för FAIL.\nREVIEW: ingen kanal utlöser FAIL, men minst en har mindre än 1/3 EV marginal. Öka inte exponeringen; prova en något kortare tid.\nFAIL: minst en kanal har 0,01 procent eller mer av mätvärdena vid/över gränsen. Kontrollera först rätt filmprov och område. Om området är korrekt: prova kortare exponeringstid.\nGränsen är en RAW-linjäritetsgräns efter svartnivåsubtraktion, inte ett JPEG-histogram. Förlust av linearitet kan vara relevant redan innan hård sensormättnad.\nLOW markerar en kanal vars median ligger mer än 8 EV under klippreferensen. För vissa kameror används LibRaws vitnivå som referens."
         ],
         [
           "Diagram och tabell",
@@ -96,7 +96,7 @@
         ],
         [
           "Välj tid med marginal",
-          "Choose a measured time listar tider där alla upprepningar klarade klippkriterierna. Granska en eventuell proportionalitetsvarning innan du använder kandidaten. Kontrollera vald tid med en ny FB+F-bild."
+          "Choose a measured time listar tider där alla upprepningar klarade klippkriterierna. Granska en eventuell proportionalitetsvarning innan du använder kandidaten. Kontrollera vald tid med en ny FB+F-bild. Vid motstridiga resultat ber appen dig ta om serien innan du väljer en tid."
         ]
       ]
     },
@@ -118,12 +118,12 @@
         ],
         [
           "Krav, version och licenser",
-          "Handboken gäller Pythonappen i v1.0.0. Camera-41_exp använder GPL-3.0-or-later. Se LICENSE, LICENSE_NOTICE.md och medföljande tredjepartslicenser."
+          "Handboken gäller Pythonappen i v1.0.1. Camera-41_exp använder GPL-3.0-or-later. Se LICENSE, LICENSE_NOTICE.md och medföljande tredjepartslicenser."
         ]
       ]
     }
   ],
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "Christer Törnkvist",
   "email": "christer@borgasundsfotografiska.se",
   "github": "https://github.com/chto0703009/Camera-41_exp"

@@ -12,6 +12,8 @@ import subprocess
 
 from PyInstaller.__main__ import run
 
+from build_dmg import app_source_digest
+
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -44,6 +46,7 @@ def main():
         parser.error("The Intel Ventura build needs a statically linked Ventura-compatible --raw-probe.")
     files = [
         (ROOT / "VERSION", "."),
+        (ROOT / "resources/Camera41Exp.icns", "resources"),
         (ROOT / "LICENSE", "Notices"),
         (ROOT / "LICENSE_NOTICE.md", "Notices"),
         (ROOT / "third_party/licenses", "Notices/third-party"),
@@ -63,11 +66,14 @@ def main():
     ]
     for source, destination in files:
         args.extend(("--add-data", f"{source}:{destination}"))
+    source_digest = app_source_digest()
     run([*args, str(ROOT / "camera41exp/app.py")])
     app = output / "dist/Camera-41_exp.app"
     info = app / "Contents/Info.plist"
     metadata = plistlib.loads(info.read_bytes())
-    metadata.update(CFBundleVersion=version, CFBundleShortVersionString=version,
+    if source_digest != app_source_digest():
+        raise SystemExit("Application sources changed during the build. Run the build again.")
+    metadata.update(Camera41SourceSHA256=source_digest, CFBundleVersion=version, CFBundleShortVersionString=version,
                     LSMinimumSystemVersion=minimum)
     info.write_bytes(plistlib.dumps(metadata))
     subprocess.run(["codesign", "--force", "--sign", "-", str(app)], check=True)

@@ -1,3 +1,16 @@
+# Camera-41_exp v1.0.1
+
+Camera-41_exp helps set the digital camera exposure when digitising C-41 colour and black-and-white negatives with a VALOI setup. It compares RAW exposures of clear film base plus fog to find a strong signal with headroom before clipping.
+
+- The welcome screen guides users through capturing and adding the RAW series. The app includes standard macOS menus and shortcuts.
+- The report marks weak channels as LOW and identifies when LibRaw's white level supplies the clipping reference.
+- A series with contradictory exposure results asks for a repeat and withholds the shutter recommendation. Manual coordinates accept whole numbers, including space-grouped thousands.
+- The disk image includes separate Apple Silicon (macOS 14+) and Intel (macOS 13+) apps. The Intel build is tested through Rosetta on Apple Silicon.
+
+See [INSTALL.md](INSTALL.md) and the English and Swedish guides.
+
+---
+
 # Camera-41_exp v1.0.0
 
 Camera-41_exp helps set the digital camera exposure when digitising C-41 colour and black-and-white (B&W) film negatives with a VALOI setup. At a fixed aperture, it compares RAW captures of clear film base plus fog to find a shutter speed that gives a strong signal with room before clipping. Too much exposure can clip a sensor channel. Too little leaves a weak signal, making noise more visible when the scan is brightened.

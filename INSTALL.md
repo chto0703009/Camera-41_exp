@@ -1,6 +1,6 @@
-# Camera-41_exp v1.0.0 installation
+# Camera-41_exp v1.0.1 installation
 
-Open `Camera-41_exp-1.0.0-python-macos.dmg` from the v1.0.0 release assets.
+Open `Camera-41_exp-1.0.1-python-macos.dmg` from the v1.0.1 release assets.
 Drag **Camera-41_exp - Apple Silicon.app** to Applications on an M-series
 Mac with macOS 14 Sonoma or later, or **Camera-41_exp - Intel.app** on an Intel
 Mac with macOS 13 Ventura or later. Eject the disk image
@@ -9,7 +9,7 @@ MATLAB, Homebrew, PRE or NEG. The interface is in English.
 
 The apps are ad hoc signed. The disk image has no Apple notarisation.
 Compare the disk image against its accompanying SHA-256 file with
-`shasum -a 256 Camera-41_exp-1.0.0-python-macos.dmg`.
+`shasum -a 256 Camera-41_exp-1.0.1-python-macos.dmg`.
 
 ## First run
 
@@ -42,7 +42,9 @@ use the Ventura-compatible NumPy OpenBLAS wheel and pass
 built for macOS 13 or earlier. The release source archive includes that probe.
 The build is
 written to `local-config/python-app/<architecture>/dist/`. The executable
-accepts `--startup-check` and `--smoke-test /path/to/test.CR2`.
+accepts `--startup-check` and `--smoke-test /path/to/test.CR2`. Neither writes to the diagnostic log.
+With both apps built, `.venv/bin/python tools/build_dmg.py --libraw-source LibRaw-0.22.1.tar.gz LibRaw-0.22.3.tar.gz --smoke-raw RAW [RAW ...]` audits them and creates the disk image.
+Run the tests with `.venv/bin/python -m unittest discover -s tests`.
 
 The legacy MATLAB entry point is `start.m` or `startCamera41_exp`.
 See [PYTHON_ENVIRONMENT.md](PYTHON_ENVIRONMENT.md) for its runtime setup.

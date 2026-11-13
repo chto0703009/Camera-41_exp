@@ -1,4 +1,7 @@
-"""Build a clean, checksummed release from tracked files using Python stdlib."""
+"""Build a clean, checksummed source release from tracked files using Python stdlib.
+
+The standalone apps and disk image are built with build_exp_python_app.py and build_dmg.py.
+"""
 from pathlib import Path
 import hashlib
 import json
@@ -14,7 +17,9 @@ def main():
     if git('status','--porcelain','--untracked-files=no'):
         raise SystemExit('Commit tracked changes before building a release.')
     version=(ROOT/'VERSION').read_text().strip()
-    if version!='0.1.4':raise SystemExit('Review release metadata for this version first.')
+    for notes in ('RELEASE_NOTES.md','CHANGELOG.md'):
+        if not (ROOT/notes).read_text().startswith(f'# Camera-41_exp v{version}'):
+            raise SystemExit(f'Describe v{version} at the top of {notes} first.')
     commit=git('rev-parse','HEAD');prefix=f'Camera-41_exp-v{version}'
     files=git('ls-files','-s').splitlines();entries=[]
     for line in files:
@@ -25,11 +30,11 @@ def main():
         if Path(name).suffix.lower() in {'.cr2','.cr3','.dng','.nef','.arw','.raf','.rw2','.orf','.pef'}:raise SystemExit('RAW file tracked: '+name)
         if mode=='120000':raise SystemExit('Review symbolic link before release: '+name)
         data=(ROOT/name).read_bytes();entries.append((name,data,0o755 if mode=='100755' else 0o644))
-    required={'VERSION','start.m','startCamera41_exp.m','LICENSE','LICENSE_NOTICE.md','INSTALL.md',
+    required={'VERSION','camera41exp/app.py','camera41exp/exposure.py','start.m','startCamera41_exp.m','LICENSE','LICENSE_NOTICE.md','INSTALL.md',
               'output/pdf/Camera41_exp_Handbook_SV.pdf','output/pdf/Camera41_exp_Handbook_EN.pdf'}
     if not required.issubset({e[0] for e in entries}):raise SystemExit('Required release file missing.')
     manifest={'Schema':'camera41.exposure-release.v1','Version':version,'SourceCommit':commit,
-              'Platform':'macOS / MATLAB','VerifiedPlatform':'Apple Silicon / MATLAB R2025b',
+              'Platform':'macOS / Python source with legacy MATLAB interface','VerifiedPlatform':'Apple Silicon',
               'PhysicalIntelVerified':False,'PREorNEGRequired':False,
               'Files':{name:{'Bytes':len(data),'SHA256':sha(data)} for name,data,_ in entries}}
     dist=ROOT/'dist'/f'v{version}';dist.mkdir(parents=True,exist_ok=True)

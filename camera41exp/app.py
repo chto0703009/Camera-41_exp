@@ -7,6 +7,7 @@ from datetime import datetime
 from io import BytesIO
 import json
 import math
+import re
 from pathlib import Path
 import sys
 from threading import Thread
@@ -19,8 +20,11 @@ from PIL import Image, ImageDraw
 from PyObjCTools import AppHelper
 
 from camera41exp.exposure import (
-    AreaReview, CHANNELS, PASS_MARGIN, RAW_EXTENSIONS, ROOT, analyse, automatic_area, decode, raw_probe,
+    AreaReview, CHANNELS, MIN_SIGNAL, PASS_MARGIN, RAW_EXTENSIONS, ROOT, analyse, automatic_area, decode,
+    is_raw, raw_probe,
 )
+
+APP_NAME = "Camera-41_exp"
 
 VERSION = (ROOT / "VERSION").read_text().strip()
 PREFERENCES = A.NSUserDefaults.standardUserDefaults()
@@ -37,10 +41,70 @@ SELECTION_MESSAGES = {
     "PROVISIONAL_REFINE_BRACKET": "Provisional. Measure a time between the passing and upper bracket.",
     "HIGHEST_BRACKETED_PASS_EXPOSURE_ONLY": "Highest passing time within a bracket of one third EV.",
     "REVIEW_LINEAR_RESPONSE_BEFORE_USING_CANDIDATE": "Review the linear response before using this time.",
+    "REVIEW_INCONSISTENT_SERIES": (
+        "The series is inconsistent: headroom should shrink and signal grow with longer shutter times. "
+        "Check that the light, sample and camera settings were unchanged, then repeat the series."
+    ),
 }
+WELCOME_TITLE = "Find the shutter time for digitising film negatives"
+WELCOME = (
+    "Camera-41_exp compares RAW captures of clear film base + fog (FB+F) from a VALOI setup. "
+    "It shows which shutter time gives a strong signal with room before a sensor channel clips. "
+    "Your RAW files are never changed.\n"
+    "What to do\n"
+    "1.  Photograph the empty film base at several shutter times in 1/3 EV steps. "
+    "Keep the camera, ISO, aperture and light the same, and save the captures as RAW files.\n"
+    "2.  Choose Add FB+F RAWs… and select those RAW files. JPEG, TIFF and other exports cannot be used.\n"
+    "3.  Describe the Light setup and the Film base + fog sample, "
+    "then tick Same FB+F sample in all RAWs.\n"
+    "4.  Optional: choose Preview selected to inspect the yellow measurement area. "
+    "Drag on the image to move it.\n"
+    "5.  Choose Analyse RAW images, then read Results and Exposure comparison.\n"
+    "6.  Pick a measured passing time in the list beside the Analyse button "
+    "and use it for the film’s captures."
+)
+NO_RESULTS = "No results yet. Add FB+F RAWs, fill in the fields above and choose Analyse RAW images."
+NO_CHARTS = "The signal and headroom charts appear here after Analyse RAW images."
+log_enabled = True
+
+
+def app_icon():
+    image = A.NSImage.alloc().initWithContentsOfFile_(str(ROOT / "resources/Camera41Exp.icns"))
+    return image or A.NSApplication.sharedApplication().applicationIconImage()
+
+
+def raw_types():
+    """Content types for the RAW extensions, without a PyObjC wrapper dependency."""
+    A.NSBundle.bundleWithPath_("/System/Library/Frameworks/UniformTypeIdentifiers.framework").load()
+    create = objc.lookUpClass("UTType").typeWithFilenameExtension_
+    return [kind for kind in map(create, RAW_EXTENSIONS) if kind is not None]
+
+
+def build_menu(app):
+    main = A.NSMenu.alloc().init()
+
+    def submenu(title, *entries):
+        menu = A.NSMenu.alloc().initWithTitle_(title)
+        for entry in entries:
+            if entry is None:
+                menu.addItem_(A.NSMenuItem.separatorItem())
+            else:
+                menu.addItemWithTitle_action_keyEquivalent_(*entry)
+        main.addItemWithTitle_action_keyEquivalent_(title, None, "").setSubmenu_(menu)
+        return menu
+
+    submenu(APP_NAME, (f"About {APP_NAME}", "orderFrontStandardAboutPanel:", ""), None,
+            (f"Hide {APP_NAME}", "hide:", "h"), None, (f"Quit {APP_NAME}", "terminate:", "q"))
+    submenu("Edit", ("Undo", "undo:", "z"), ("Redo", "redo:", "Z"), None, ("Cut", "cut:", "x"),
+            ("Copy", "copy:", "c"), ("Paste", "paste:", "v"), ("Select All", "selectAll:", "a"))
+    app.setWindowsMenu_(submenu("Window", ("Minimize", "performMiniaturize:", "m"),
+                                ("Close", "performClose:", "w")))
+    app.setMainMenu_(main)
 
 
 def log(event, **details):
+    if not log_enabled:
+        return
     try:
         LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
         with LOG_PATH.open("a", encoding="utf-8") as stream:
@@ -164,9 +228,10 @@ def comparison_image(rows):
             for x in range(x0, x1, 14):
                 draw.line((x, y, min(x+7, x1), y), fill="#505050")
             label = "Minimum headroom for PASS: 1/3 EV"
-            left, top, right, bottom = draw.textbbox((x1-8, y-7), label, anchor="rb", font_size=13)
+            # Headroom is largest at the short times, so the left end stays clear of the curves.
+            left, top, right, bottom = draw.textbbox((x0+8, y-7), label, anchor="lb", font_size=13)
             draw.rectangle((left-4, top-2, right+4, bottom+2), fill="white")
-            draw.text((x1-8, y-7), label, anchor="rb", fill="#333333", font_size=13)
+            draw.text((x0+8, y-7), label, anchor="lb", fill="#333333", font_size=13)
         plotted_x = [abscissa(position) for position in positions]
         for i, color in enumerate(colors):
             points = list(zip(plotted_x, map(ordinate, values[:, i])))
@@ -204,6 +269,13 @@ class ImagePanel(A.NSView):
             ))
             outline.setLineWidth_(2)
             outline.stroke()
+
+    @objc.python_method
+    def show(self, image):
+        self.image = image
+        if self.placeholder is not None:
+            self.placeholder.setHidden_(image is not None)
+        self.setNeedsDisplay_(True)
 
     @objc.python_method
     def sensor_point(self, event):
@@ -264,12 +336,44 @@ class Controller(NSObject):
         return field
 
     @objc.python_method
-    def panel(self, owner):
+    def panel(self, owner, body, title=None, icon=None):
         panel = ImagePanel.alloc().initWithFrame_(NSMakeRect(0, 0, 600, 300))
         panel.setWantsLayer_(True)
         panel.layer().setMasksToBounds_(True)
         panel.image = panel.drag_roi = panel.start = None
         panel.owner = owner
+        # Guidance shown until the panel has an image.
+        style = A.NSMutableParagraphStyle.alloc().init()
+        style.setParagraphSpacing_(9)
+        text = A.NSMutableAttributedString.alloc().init()
+        for content, font in ((title, A.NSFont.boldSystemFontOfSize_(18)), (body, A.NSFont.systemFontOfSize_(14))):
+            if content:
+                text.appendAttributedString_(A.NSAttributedString.alloc().initWithString_attributes_(
+                    content + "\n", {A.NSFontAttributeName: font, A.NSParagraphStyleAttributeName: style,
+                                     A.NSForegroundColorAttributeName: A.NSColor.labelColor()}))
+        text.deleteCharactersInRange_((text.length() - 1, 1))
+        label = A.NSTextField.wrappingLabelWithString_("")
+        label.setAttributedStringValue_(text)
+        label.setSelectable_(False)
+        guide = label
+        if icon is not None:
+            picture = A.NSImageView.imageViewWithImage_(icon)
+            picture.setImageScaling_(A.NSImageScaleProportionallyUpOrDown)
+            for anchor in (picture.widthAnchor(), picture.heightAnchor()):
+                anchor.constraintEqualToConstant_(128).setActive_(True)
+            guide = self.stack(False, picture, label)
+            guide.setAlignment_(A.NSLayoutAttributeTop)
+            guide.setSpacing_(24)
+        guide.setTranslatesAutoresizingMaskIntoConstraints_(False)
+        panel.addSubview_(guide)
+        for constraint in (
+            guide.centerXAnchor().constraintEqualToAnchor_(panel.centerXAnchor()),
+            guide.centerYAnchor().constraintEqualToAnchor_(panel.centerYAnchor()),
+            label.widthAnchor().constraintLessThanOrEqualToConstant_(660),
+            guide.leadingAnchor().constraintGreaterThanOrEqualToAnchor_constant_(panel.leadingAnchor(), 24),
+        ):
+            constraint.setActive_(True)
+        panel.placeholder = guide
         return panel
 
     @objc.python_method
@@ -306,9 +410,11 @@ class Controller(NSObject):
         area = self.stack(False, self.automatic, *coordinates, self.confirm)
         self.set_roi(self.roi)
 
-        self.preview_panel, self.graph = self.panel(self), self.panel(None)
+        self.preview_panel = self.panel(self, WELCOME, WELCOME_TITLE, app_icon())
+        self.graph = self.panel(None, NO_CHARTS)
         self.report = A.NSTextView.alloc().initWithFrame_(NSMakeRect(0, 0, 600, 200))
         self.report.setEditable_(False)
+        self.report.setString_(NO_RESULTS)
         self.report.setFont_(A.NSFont.monospacedSystemFontOfSize_weight_(13, A.NSFontWeightRegular))
         self.report.setVerticallyResizable_(True)
         self.report.setAutoresizingMask_(A.NSViewWidthSizable)
@@ -360,8 +466,19 @@ class Controller(NSObject):
     @objc.python_method
     def set_roi(self, roi):
         self.roi = roi
+        # Plain digits: locale grouping such as "1 311" does not read back as a number.
         for field, value in zip(self.coords, roi):
-            field.setIntegerValue_(value)
+            field.setStringValue_(str(value))
+
+    @objc.python_method
+    def typed_roi(self):
+        values = []
+        for field in self.coords:
+            value = str(field.stringValue()).strip()
+            if not re.fullmatch(r"[0-9]+|[0-9]{1,3}(?:[   ][0-9]{3})+", value):
+                return None
+            values.append(int("".join(value.split())))
+        return tuple(values)
 
     @objc.python_method
     def update_controls(self):
@@ -374,17 +491,18 @@ class Controller(NSObject):
 
     def controlTextDidChange_(self, notification):
         if notification.object() in self.coords:
-            self.roi = tuple(field.integerValue() for field in self.coords)
-            self.manual_needed = min(self.roi) <= 0 or min(self.roi[2:]) < 20
+            roi = self.typed_roi()
+            self.manual_needed = roi is None or min(roi) <= 0 or min(roi[2:]) < 20
+            if not self.manual_needed:
+                self.roi = roi
             self.preview_panel.setNeedsDisplay_(True)
         self.settingsChanged_(None)
 
     def settingsChanged_(self, sender):
         self.times.removeAllItems()
         self.times.addItemWithTitle_("Analyse first")
-        self.report.setString_("")
-        self.graph.image = None
-        self.graph.setNeedsDisplay_(True)
+        self.report.setString_(NO_RESULTS)
+        self.graph.show(None)
         self.status.setStringValue_("Settings changed. Analyse to update the exposure result.")
         self.update_controls()
 
@@ -395,8 +513,7 @@ class Controller(NSObject):
             self.files.addItemsWithTitles_([str(path) for path in self.paths])
         else:
             self.files.addItemWithTitle_("No RAW files")
-        self.preview_panel.image = None
-        self.preview_panel.setNeedsDisplay_(True)
+        self.preview_panel.show(None)
         self.sensor = None
         self.manual_needed = False
         self.automatic.setState_(A.NSControlStateValueOn)
@@ -406,15 +523,21 @@ class Controller(NSObject):
     def addFiles_(self, sender):
         panel = A.NSOpenPanel.openPanel()
         panel.setAllowsMultipleSelection_(True)
-        panel.setAllowedFileTypes_(list(RAW_EXTENSIONS))
+        panel.setAllowedContentTypes_(raw_types())
         folder = PREFERENCES.stringForKey_("Camera41ExpPythonRAWFolder")
         if folder and Path(folder).is_dir():
             panel.setDirectoryURL_(A.NSURL.fileURLWithPath_(folder))
         if panel.runModal() == A.NSModalResponseOK:
-            additions = [Path(url.path()).resolve() for url in panel.URLs()]
-            self.paths = list(dict.fromkeys(self.paths + additions))
-            PREFERENCES.setObject_forKey_(str(additions[0].parent), "Camera41ExpPythonRAWFolder")
-            self.update_files()
+            chosen = [Path(url.path()).resolve() for url in panel.URLs()]
+            additions = [path for path in chosen if is_raw(path)]
+            PREFERENCES.setObject_forKey_(str(chosen[0].parent), "Camera41ExpPythonRAWFolder")
+            if additions:
+                self.paths = list(dict.fromkeys(self.paths + additions))
+                self.update_files()
+            if len(additions) < len(chosen):
+                self.status.setStringValue_(
+                    f"Only camera RAW files can be analysed ({', '.join(RAW_EXTENSIONS).upper()}). "
+                    f"Left out {len(chosen) - len(additions)} other file(s).")
 
     def removeFile_(self, sender):
         if self.paths:
@@ -464,8 +587,7 @@ class Controller(NSObject):
             if review:
                 self.automatic.setState_(A.NSControlStateValueOff)
                 self.update_controls()
-            self.preview_panel.image = native_image(image)
-            self.preview_panel.setNeedsDisplay_(True)
+            self.preview_panel.show(native_image(image))
             self.tabs.selectTabViewItemWithIdentifier_("preview")
             self.status.setStringValue_(str(review) if review else
                 "Display preview. Drag the yellow area to measure a clean part of the film base.")
@@ -485,7 +607,10 @@ class Controller(NSObject):
         if self.manual_needed:
             self.status.setStringValue_("Adjust the yellow measurement area before analysing again.")
             return
-        roi = None if self.automatic.state() else tuple(field.integerValue() for field in self.coords)
+        roi = None if self.automatic.state() else self.typed_roi()
+        if not self.automatic.state() and roi is None:
+            self.status.setStringValue_("Enter whole numbers for X, Y, Width and Height.")
+            return
         paths = self.paths.copy()
         self.settingsChanged_(None)
         log("analysis.begin", Files=[str(path) for path in paths], Light=light, Sample=sample, ROI=roi)
@@ -498,7 +623,10 @@ class Controller(NSObject):
         self.preview_panel.setNeedsDisplay_(True)
         lines = [SELECTION_MESSAGES[selection.status], f"Measurement area [x y width height]  {roi}",
                  f"Proportionality  {selection.proportionality.replace('_', ' ').lower()}",
-                 "Pass limits per channel  ≥ ⅓ EV headroom and < 0.01% at the linearity limit."]
+                 "Pass limits per channel  ≥ ⅓ EV headroom, < 0.01% at the clipping reference"
+                 f" and a median within {-math.log2(MIN_SIGNAL):g} EV of it (otherwise LOW)."]
+        if any(row.white_level_fallback for row in rows):
+            lines.append("Clipping reference  LibRaw white level. These RAWs carry no per-channel linearity limit.")
         if selection.candidate is not None:
             lines.append(f"Suggested measured time  {selection.candidate:.8g} s")
         if selection.next_test is not None:
@@ -508,14 +636,17 @@ class Controller(NSObject):
             for i, channel in enumerate(CHANNELS):
                 lines.append(f"  {channel:2s}  {row.signal[i]:9.1f} codes  {row.margin[i]:7.3f} EV"
                              f"  {100*row.clipped[i]:9.4f}%  {row.channel_status[i]}")
-        lines += ["", HANDOFF]
+        if selection.candidate is not None:
+            lines += ["", HANDOFF]
         self.report.setString_("\n".join(lines))
-        self.graph.image = native_image(comparison_image(rows))
-        self.graph.setNeedsDisplay_(True)
+        self.graph.show(native_image(comparison_image(rows)))
         passing = sorted({row.seconds for row in rows if row.status == "PASS"}
                          - {row.seconds for row in rows if row.status != "PASS"})
+        if selection.status == "REVIEW_INCONSISTENT_SERIES":
+            passing = []
         self.times.removeAllItems()
-        self.times.addItemWithTitle_("Choose a measured time" if passing else "No passing exposure")
+        self.times.addItemWithTitle_("Repeat the series" if selection.status == "REVIEW_INCONSISTENT_SERIES"
+                                    else "Choose a measured time" if passing else "No passing exposure")
         for time in passing:
             self.times.addItemWithTitle_(f"{time:.8g} s")
             self.times.lastItem().setRepresentedObject_(time)
@@ -533,12 +664,15 @@ class Controller(NSObject):
 
     def openLog_(self, sender):
         log("log.open")
-        A.NSWorkspace.sharedWorkspace().openFile_(str(LOG_PATH))
+        A.NSWorkspace.sharedWorkspace().openURL_(A.NSURL.fileURLWithPath_(str(LOG_PATH)))
 
     def windowShouldClose_(self, window):
         if self.busy:
             self.status.setStringValue_("Wait for the RAW operation to finish before closing.")
         return not self.busy
+
+    def applicationShouldTerminate_(self, sender):
+        return A.NSTerminateNow if self.windowShouldClose_(self.window) else A.NSTerminateCancel
 
     def windowWillClose_(self, notification):
         A.NSApplication.sharedApplication().terminate_(None)
@@ -552,7 +686,14 @@ def main():
     app = A.NSApplication.sharedApplication()
     app.setActivationPolicy_(A.NSApplicationActivationPolicyRegular)
     controller = Controller.alloc().init()
+    if args.startup_check or args.smoke_test:
+        # Build checks must not write to the user's diagnostic log.
+        global log_enabled
+        log_enabled = False
     window = controller.build()
+    app.setDelegate_(controller)
+    build_menu(app)
+    app.setApplicationIconImage_(app_icon())
     if args.startup_check or args.smoke_test:
         raw_probe()
         if args.smoke_test:
@@ -560,7 +701,7 @@ def main():
             capture = decode(paths[0])
             roi, _ = automatic_area(capture.linear)
             assert native_image(preview_image(capture)) is not None
-            controller.show_results(analyse(paths, roi))
+            controller.show_results(analyse(paths))
             assert controller.graph.image is not None and controller.report.string()
         print("CAMERA41_EXP_PYTHON_STARTUP_OK")
         return
